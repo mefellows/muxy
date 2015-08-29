@@ -1,0 +1,30 @@
+box: tcnksm/gox
+build:
+    steps:
+        - setup-go-workspace
+        - script:
+            name: go get
+            code: |
+                go get -t ./...
+        - script:
+            name: go test
+            code: |
+                make test
+        - script:
+            name: Publish Coveralls
+            code: goveralls -service="wercker.com" -coverprofile=profile.cov -repotoken $COVERALLS_TOKEN
+        - script:
+            name: gox build
+            code: |
+                XC_OS="linux darwin freebsd" XC_ARCH="386 amd64" make bin
+        - tcnksm/zip:
+            input: pkg
+            output: $WERCKER_OUTPUT_DIR/dist
+deploy:
+    steps:
+        - tcnksm/ghr:
+            token: $GITHUB_TOKEN
+            version: $RELEASE_VERSION
+            input: dist
+            replace: true
+            pre-release: $RELEASE_IS_DRAFT
