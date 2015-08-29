@@ -2,6 +2,7 @@ package command
 
 import (
 	"flag"
+	"github.com/mefellows/muxy/muxy"
 	"strings"
 )
 
@@ -28,6 +29,9 @@ func (c *ProxyCommand) Run(args []string) int {
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
 	}
+
+	muxy := &muxy.Muxy{}
+	muxy.Run()
 
 	return 0
 }

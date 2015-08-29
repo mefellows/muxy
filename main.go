@@ -2,13 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/mefellows/muck/command"
+	"github.com/mefellows/muxy/command"
 	"github.com/mitchellh/cli"
 	"os"
+	"strings"
 )
 
 func main() {
-	cli := cli.NewCLI("muck", "1.0.0")
+	os.Exit(realMain())
+}
+
+func realMain() int {
+	cli := cli.NewCLI(strings.ToLower(APPLICATION_NAME), VERSION)
 	cli.Args = os.Args[1:]
 	cli.Commands = command.Commands
 
@@ -17,5 +22,5 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
 
-	os.Exit(exitStatus)
+	return exitStatus
 }
