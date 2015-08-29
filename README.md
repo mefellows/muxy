@@ -2,6 +2,8 @@
 
 Simulating real-world distributed system failures to improve resilience in your applications.
 
+[![wercker status](https://app.wercker.com/status/e45703ebafd48632db56f022cc54546b/s "wercker status")](https://app.wercker.com/project/bykey/e45703ebafd48632db56f022cc54546b)
+
 ## Introduction
 
 Muxy is a proxy that _mucks_ around with your system and application context, allowing you to simulate common failure scenarios from the perspective of an application under test - such as an API or a web application. 
