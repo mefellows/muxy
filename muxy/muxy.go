@@ -3,6 +3,7 @@ package muxy
 import (
 	"fmt"
 	s "github.com/mefellows/muxy/symptom"
+  "github.com/mefellows/muxy/config"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -10,20 +11,44 @@ import (
 	"os/signal"
 )
 
-// Listen on a given port/ip
-type Config struct{}
+const (
+	DEFAULT_PORT = 8123
+	DEFAULT_HOST = "0.0.0.0"
+)
 
-type Muxy struct {
-	c        Config
-	symptoms []Symptom
+type MuxyConfig struct {
+	Port          int    // Which port to listen on
+	Host          string // Which network host/ip to listen on
+	ProxyPort     int    // Which port proxy
+	ProxyHost     string // Which network host/ip to proxy
+	ProxyProtocol string // Which protocol to proxy (http, tcp, ...)
+	Insecure      bool   // Enable/Disable TLS between Muxy <-> Proxied Host
+	Ssl           bool   // Enable/Disable TLS between client <-> Muxy
+	RawConfig     *config.RawConfig
+	ConfigFile    string // Path to YAML Configuration File
 }
 
-func New() *Muxy {
-	return &Muxy{}
+type Muxy struct {
+	config *MuxyConfig
+
+	symptoms    []Symptom
+	middlewares []Middleware
+}
+
+func New(config *MuxyConfig) *Muxy {
+	return &Muxy{config: config}
+}
+
+func NewWithDefaultMuxyConfig() *Muxy {
+	c := &MuxyConfig{
+		Port: DEFAULT_PORT,
+		Host: DEFAULT_HOST,
+	}
+	return &Muxy{config: c}
 }
 
 func (m *Muxy) Run() {
-	log.Println("Running Muxy server on port 1234")
+	log.Println(fmt.Sprintf("Running Muxy server on port %d", m.config.Port))
 
 	// Read in test fixture settings as state into the Muxy server
 
@@ -46,8 +71,9 @@ func (m *Muxy) Run() {
 		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			director := func(req *http.Request) {
 				req = r
-				req.URL.Scheme = "http"
-				req.URL.Host = "127.0.0.1:8282"
+				req.URL.Scheme = m.config.ProxyProtocol
+				req.URL.Host = fmt.Sprintf("%s:%d", m.config.ProxyHost, m.config.ProxyPort)
+				log.Println("Proxying : ", fmt.Sprintf("%s://%s:%d", m.config.ProxyProtocol, m.config.ProxyHost, m.config.ProxyPort))
 			}
 			log.Println("request received")
 			symptom.Muck()
@@ -55,7 +81,7 @@ func (m *Muxy) Run() {
 			proxy := &httputil.ReverseProxy{Director: director}
 			proxy.ServeHTTP(w, r)
 		})
-		err := http.ListenAndServe(":1234", mux)
+		err := http.ListenAndServe(fmt.Sprintf("%s:%d", m.config.Host, m.config.Port), mux)
 		if err != nil {
 			log.Println(fmt.Sprintf("ListenAndServe error: ", err))
 		}
