@@ -25,7 +25,7 @@ symptoms:
 `)
 
 	cl := &ConfigLoader{}
-	c := cl.Load([]byte(data))
+	c, _ := cl.Load([]byte(data))
 
 	if len(c.Symptoms) != 2 {
 		t.Fatalf("Expected 2 symptoms, but got %d", len(c.Symptoms))
