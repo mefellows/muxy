@@ -3,7 +3,7 @@ package config
 import (
 	"github.com/spf13/cast"
 	"gopkg.in/yaml.v2"
-	"log"
+	"io/ioutil"
 	"reflect"
 	"strings"
 	"time"
@@ -148,12 +148,19 @@ type Config struct {
 
 type ConfigLoader struct{}
 
-func (cl *ConfigLoader) Load(data []byte) *Config {
+func (cl *ConfigLoader) Load(data []byte) (*Config, error) {
 	c := &Config{}
 
 	err := yaml.Unmarshal(data, &c)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		return nil, err
 	}
-	return c
+	return c, nil
+}
+func (cl *ConfigLoader) LoadFromFile(filename string) (*Config, error) {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	return cl.Load(data)
 }

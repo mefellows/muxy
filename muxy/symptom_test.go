@@ -1,6 +1,7 @@
 package muxy
 
 import (
+	"github.com/mefellows/muxy/config"
 	"log"
 )
 
@@ -12,7 +13,7 @@ type MockSymptom struct {
 	SetupCount     int
 }
 
-func (m MockSymptom) Configure(c *RawConfig) error {
+func (m MockSymptom) Configure(c *config.RawConfig) error {
 	log.Println("Mock Configure()")
 	m.ConfigureCount = m.ConfigureCount + 1
 	return m.ConfigureError

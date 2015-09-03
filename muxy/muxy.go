@@ -2,8 +2,8 @@ package muxy
 
 import (
 	"fmt"
-	s "github.com/mefellows/muxy/symptom"
-  "github.com/mefellows/muxy/config"
+	//s "github.com/mefellows/muxy/symptom"
+	"github.com/mefellows/muxy/config"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -52,22 +52,56 @@ func (m *Muxy) Run() {
 
 	// Read in test fixture settings as state into the Muxy server
 
+	// Load Configuration
+	var c *config.Config
+	var err error
+	if m.config.ConfigFile != "" {
+		confLoader := &config.ConfigLoader{}
+		c, err = confLoader.LoadFromFile(m.config.ConfigFile)
+		if err != nil {
+			log.Fatalf("Unable to read configuration file: %s", err.Error())
+		}
+	} else {
+		log.Fatal("No config file provided")
+	}
+
 	// Load all plugins
+	// TODO: Extract these plugin lifecycle events into the plugin lib?
+	symptoms := make([]Symptom, len(c.Symptoms))
+	for i, symptomConfig := range c.Symptoms {
+		log.Printf("[DEBUG] Loading Symptom: %s", symptomConfig.Name)
+		sf, ok := SymptomFactories.Lookup(symptomConfig.Name)
 
-	// -> Symptoms
-	// Read in symptoms + symptom configs (Use Hashi's config type or custom DSL?)
-	symptom := &s.ShittyNetworkSymptom{}
+		if !ok {
+			log.Fatalf("Unable to load symptom with name: %s", symptomConfig.Name)
+		}
 
-	// -> Middlewares (stats etc.)
+		s, err := sf()
+
+		if err != nil {
+			log.Fatalf("Encountered error loading symptom: %v", err)
+		}
+		// TODO: Collapse this into the constructor, is it necessary??
+		s.Configure(&symptomConfig.Config)
+		symptoms[i] = s
+	}
+
+	// Setup all plugins...
+	for _, s := range symptoms {
+		s.Setup()
+	}
+
+	// -> Repeat for Middlewares (stats etc.)
 
 	// Interrupt handler
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, os.Kill)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, os.Kill)
 
 	// Startup proxy
+	// TODO: This should also be abstracted into a plugin
 	go func() {
 		mux := http.NewServeMux()
-		symptom.Setup()
+		//symptom.Setup()
 		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			director := func(req *http.Request) {
 				req = r
@@ -76,7 +110,25 @@ func (m *Muxy) Run() {
 				log.Println("Proxying : ", fmt.Sprintf("%s://%s:%d", m.config.ProxyProtocol, m.config.ProxyHost, m.config.ProxyPort))
 			}
 			log.Println("request received")
-			symptom.Muck()
+
+			// Execute Middleware lifecycle hook: pre-muck
+			//for _, s := range middlewares {
+			//	go func() {
+			//    s.Whatever(context...)
+			//  }()
+			//}
+
+			//	symptom.Muck()
+			for _, s := range symptoms {
+				s.Muck()
+			}
+
+			// Execute Middleware lifecycle hook: post-muck
+			//for _, s := range middlewares {
+			//	go func() {
+			//    s.Whatever(context...)
+			//  }()
+			//}
 
 			proxy := &httputil.ReverseProxy{Director: director}
 			proxy.ServeHTTP(w, r)
@@ -88,8 +140,11 @@ func (m *Muxy) Run() {
 	}()
 
 	// Block until a signal is received.
-	<-c
+	<-sigChan
 	log.Println("Shutting down Muxy...")
 
-	symptom.Teardown()
+	//symptom.Teardown()
+	for _, s := range symptoms {
+		s.Teardown()
+	}
 }

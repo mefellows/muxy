@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/mefellows/muxy/command"
+	_ "github.com/mefellows/muxy/middleware"
+	_ "github.com/mefellows/muxy/symptom"
 	"github.com/mitchellh/cli"
 	"os"
 	"strings"
