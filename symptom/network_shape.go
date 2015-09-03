@@ -34,7 +34,6 @@ func (s *ShittyNetworkSymptom) Setup() {
 
 	s.config = throttler.Config{
 		Device:           "eth0",
-		Mode:             throttler.Start,
 		Latency:          250,
 		TargetBandwidth:  750,
 		DefaultBandwidth: 740,
@@ -54,6 +53,6 @@ func (s *ShittyNetworkSymptom) Muck() {
 
 func (s *ShittyNetworkSymptom) Teardown() {
 	log.Printf("Tearing down ShittyNetworkSymptom")
-	s.config.Mode = "stop"
+	s.config.Stop = true
 	throttler.Run(&s.config)
 }
