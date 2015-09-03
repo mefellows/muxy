@@ -12,7 +12,7 @@ func init() {
 
 	Ui = &cli.ColoredUi{
 		Ui:          &cli.BasicUi{Writer: os.Stdout, Reader: os.Stdin, ErrorWriter: os.Stderr},
-		OutputColor: cli.UiColorYellow,
+		OutputColor: cli.UiColorNone,
 		InfoColor:   cli.UiColorNone,
 		ErrorColor:  cli.UiColorRed,
 	}

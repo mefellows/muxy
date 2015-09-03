@@ -23,7 +23,7 @@ fi
 
 # Determine the arch/os combos we're building for
 XC_ARCH=${XC_ARCH:-"386 amd64 arm"}
-XC_OS=${XC_OS:-linux darwin windows freebsd openbsd}
+XC_OS=${XC_OS:-linux darwin freebsd openbsd}
 
 # Install dependencies
 echo "==> Getting dependencies..."
@@ -45,14 +45,6 @@ gox \
     -output "pkg/{{.OS}}_{{.Arch}}/{{.Dir}}" \
     ./...
 set -e
-
-# Make sure "packer-packer" is renamed properly
-#for PLATFORM in $(find ./pkg -mindepth 1 -maxdepth 1 -type d); do
-#    set +e
-#    mv ${PLATFORM}/packer-packer.exe ${PLATFORM}/packer.exe 2>/dev/null
-#    mv ${PLATFORM}/packer-packer ${PLATFORM}/packer 2>/dev/null
-#    set -e
-#done
 
 # Move all the compiled things to the $GOPATH/bin
 GOPATH=${GOPATH:-$(go env GOPATH)}

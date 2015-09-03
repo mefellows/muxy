@@ -1,0 +1,367 @@
+package muxy
+
+import (
+	"fmt"
+	"github.com/hashicorp/hcl"
+	hclobj "github.com/hashicorp/hcl/hcl"
+	"github.com/hashicorp/terraform/helper/multierror"
+	"github.com/mitchellh/mapstructure"
+	"io/ioutil"
+)
+
+type Config struct {
+	MuxyConfig *MuxyConfig
+	Symptoms   []*SymptomConfig
+
+	// The fields below can be filled in by loaders for validation
+	// purposes.
+	unknownKeys []string
+}
+
+type RawConfig struct {
+	Key string
+	Raw map[string]interface{}
+
+	config      map[string]interface{}
+	unknownKeys []string
+}
+
+func (r *RawConfig) init() error {
+	r.config = r.Raw
+	return nil
+}
+
+func NewRawConfig(raw map[string]interface{}) (*RawConfig, error) {
+	result := &RawConfig{Raw: raw}
+	if err := result.init(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// Symptom is a module used within a configuration.
+//
+// This does not represent a module itself, this represents a module
+// call-site within an existing configuration.
+type SymptomConfig struct {
+	Name      string
+	RawConfig *RawConfig
+}
+
+// A unique identifier for this module.
+func (r *SymptomConfig) Id() string {
+	return fmt.Sprintf("%s", r.Name)
+}
+
+// hclConfigurable is an implementation of configurable that knows
+// how to turn HCL configuration into a *Config object.
+type hclConfigurable struct {
+	File   string
+	Object *hclobj.Object
+}
+
+func loadFileHcl(root string) (*hclConfigurable, []string, error) {
+	var obj *hclobj.Object = nil
+
+	// Read the HCL file and prepare for parsing
+	d, err := ioutil.ReadFile(root)
+	if err != nil {
+		return nil, nil, fmt.Errorf(
+			"Error reading %s: %s", root, err)
+	}
+
+	// Parse it
+	obj, err = hcl.Parse(string(d))
+	fmt.Printf("HCL Parsed: %v\n", obj)
+	fmt.Printf("HCL Parsed: %v\n", obj.Get("dir", true))
+	if err != nil {
+		return nil, nil, fmt.Errorf(
+			"Error parsing %s: %s", root, err)
+	}
+
+	// Start building the result
+	result := &hclConfigurable{
+		File:   root,
+		Object: obj,
+	}
+	return result, nil, nil
+}
+
+func (t *hclConfigurable) Config() (*Config, error) {
+	validKeys := map[string]struct{}{
+		"symptom":    struct{}{},
+		"middleware": struct{}{},
+		"dir":        struct{}{},
+	}
+
+	type hclVariable struct {
+		Default     interface{}
+		Description string
+		Fields      []string `hcl:",decodedFields"`
+	}
+
+	var rawConfig struct {
+		Variable map[string]*hclVariable
+	}
+
+	if err := hcl.DecodeObject(&rawConfig, t.Object); err != nil {
+		return nil, err
+	}
+
+	// Start building up the actual configuration. We start with
+	// variables.
+	// TODO(mitchellh): Make function like loadVariablesHcl so that
+	// duplicates aren't overriden
+	config := new(Config)
+
+	if symptoms := t.Object.Get("symptom", false); symptoms != nil {
+		var err error
+		config.Symptoms, err = loadSymptomsHcl(symptoms)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	/*
+		if muxy := t.Object.Get("muxy", false); muxy != nil {
+			var err error
+			config.MuxyConfig, err = loadMuxyHcl(muxy)
+			if err != nil {
+				return nil, err
+			}
+		}
+	*/
+
+	// Check for invalid keys
+	for _, elem := range t.Object.Elem(true) {
+		k := elem.Key
+		if _, ok := validKeys[k]; ok {
+			continue
+		}
+
+		config.unknownKeys = append(config.unknownKeys, k)
+	}
+
+	return config, nil
+}
+
+/*
+func loadMuxyHcl(os *hclobj.Object) (*MuxyConfig, error) {
+	var allNames []*hclobj.Object
+
+	// See loadResourcesHcl for why this exists. Don't touch this.
+	for _, o1 := range os.Elem(false) {
+		// Iterate the inner to get the list of types
+		for _, o2 := range o1.Elem(true) {
+			// Iterate all of this type to get _all_ the types
+			for _, o3 := range o2.Elem(false) {
+				allNames = append(allNames, o3)
+			}
+		}
+	}
+
+	// Where all the results will go
+	var result []*MuxyConfig
+
+	// Now go over all the types and their children in order to get
+	// all of the actual resources.
+	for _, obj := range allNames {
+		k := obj.Key
+
+		var config map[string]interface{}
+		if err := hcl.DecodeObject(&config, obj); err != nil {
+			return nil, fmt.Errorf(
+				"Error reading config for %s: %s",
+				k,
+				err)
+		}
+
+		rawConfig, err := NewRawConfig(config)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Error reading config for %s: %s",
+				k,
+				err)
+		}
+
+		result = append(result, &MuxyConfig{
+			P:      k,
+			RawConfig: rawConfig,
+		})
+	}
+
+	// TODO: Load all of the plugins from the plugin factory???
+
+	return result, nil
+}
+*/
+func loadSymptomsHcl(os *hclobj.Object) ([]*SymptomConfig, error) {
+	var allNames []*hclobj.Object
+
+	// See loadResourcesHcl for why this exists. Don't touch this.
+	for _, o1 := range os.Elem(false) {
+		// Iterate the inner to get the list of types
+		for _, o2 := range o1.Elem(true) {
+			// Iterate all of this type to get _all_ the types
+			for _, o3 := range o2.Elem(false) {
+				allNames = append(allNames, o3)
+			}
+		}
+	}
+
+	// Where all the results will go
+	var result []*SymptomConfig
+
+	// Now go over all the types and their children in order to get
+	// all of the actual resources.
+	for _, obj := range allNames {
+		k := obj.Key
+
+		var config map[string]interface{}
+		if err := hcl.DecodeObject(&config, obj); err != nil {
+			return nil, fmt.Errorf(
+				"Error reading config for %s: %s",
+				k,
+				err)
+		}
+
+		rawConfig, err := NewRawConfig(config)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"Error reading config for %s: %s",
+				k,
+				err)
+		}
+
+		result = append(result, &SymptomConfig{
+			Name:      k,
+			RawConfig: rawConfig,
+		})
+	}
+
+	// TODO: Load all of the plugins from the plugin factory???
+
+	return result, nil
+}
+
+// LoadProvidersHcl recurses into the given HCL object and turns
+// it into a mapping of provider configs.
+
+// A resource represents a single Terraform resource in the configuration.
+// A Terraform resource is something that represents some component that
+// can be created and managed, and has some properties associated with it.
+type Resource struct {
+	Name      string
+	Type      string
+	RawCount  *RawConfig
+	RawConfig *RawConfig
+	Provider  string
+	DependsOn []string
+}
+
+// A unique identifier for this resource.
+func (r *Resource) Id() string {
+	return fmt.Sprintf("%s.%s", r.Type, r.Name)
+}
+
+// LoadConfig loads the CLI configuration from ".terraformrc" files.
+//func LoadConfig(path string) (*Config, error) {
+func LoadConfig(path string) (*RawConfig, error) {
+	// Read the HCL file and prepare for parsing
+	d, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"Error reading %s: %s", path, err)
+	}
+
+	// Parse it
+	obj, err := hcl.Parse(string(d))
+	if err != nil {
+		return nil, fmt.Errorf(
+			"Error parsing %s: %s", path, err)
+	}
+
+	// Build up the result
+	//var result Config
+	var result RawConfig
+	if err := hcl.DecodeObject(&result, obj); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// Validate does some basic semantic checking of the configuration.
+func (c *Config) Validate() error {
+	if c == nil {
+		return nil
+	}
+
+	var errs []error
+
+	for _, k := range c.unknownKeys {
+		errs = append(errs, fmt.Errorf(
+			"Unknown root level key: %s", k))
+	}
+
+	// Check that all references to symptoms are valid
+	symptoms := make(map[string]*SymptomConfig)
+	dupped := make(map[string]struct{})
+	for _, m := range c.Symptoms {
+		// Check for duplicates
+		if _, ok := symptoms[m.Id()]; ok {
+			if _, ok := dupped[m.Id()]; !ok {
+				dupped[m.Id()] = struct{}{}
+
+				errs = append(errs, fmt.Errorf(
+					"%s: module repeated multiple times",
+					m.Id()))
+			}
+
+			// Already seen this module, just skip it
+			continue
+		}
+
+		symptoms[m.Id()] = m
+
+		// Check that the name matches our regexp
+		/*
+			if !NameRegexp.Match([]byte(m.Name)) {
+				errs = append(errs, fmt.Errorf(
+					"%s: module name can only contain letters, numbers, "+
+						"dashes, and underscores",
+					m.Id()))
+			}
+		*/
+
+		// Check that the configuration can all be strings
+		raw := make(map[string]interface{})
+		for k, v := range m.RawConfig.Raw {
+			var strVal string
+			if err := mapstructure.WeakDecode(v, &strVal); err != nil {
+				errs = append(errs, fmt.Errorf(
+					"%s: variable %s must be a string value",
+					m.Id(), k))
+			}
+			raw[k] = strVal
+		}
+
+		// Check for invalid count variables
+
+		// Update the raw configuration to only contain the string values
+		rawConfig, err := NewRawConfig(raw)
+		m.RawConfig = rawConfig
+		if err != nil {
+			errs = append(errs, fmt.Errorf(
+				"%s: can't initialize configuration: %s",
+				m.Id(), err))
+		}
+	}
+
+	if len(errs) > 0 {
+		return &multierror.Error{Errors: errs}
+	}
+
+	return nil
+}
