@@ -16,7 +16,7 @@ type HttpErrorSymptom struct {
 const DEFAULT_DELAY = 2 * time.Second
 
 func init() {
-	muxy.SymptomFactories.Register(func() (muxy.Symptom, error) {
+	muxy.SymptomFactories.Register(func(c config.RawConfig) (muxy.Symptom, error) {
 		return &HttpErrorSymptom{
 			Delay: DEFAULT_DELAY,
 		}, nil

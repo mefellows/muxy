@@ -4,6 +4,7 @@ package muxy
 // TODO: Move this into its own project?
 
 import (
+	"github.com/mefellows/muxy/config"
 	"reflect"
 	"runtime"
 	"strings"
@@ -17,8 +18,11 @@ import (
 
 // Extension type for adding new plugins
 type ProxyFactory func(protocol string) (Middleware, error)
-type MiddlewareFactory func() (Middleware, error)
-type SymptomFactory func() (Symptom, error)
+
+// TODO: Remove the burden of the plugin to have to
+//       set/configure its own config. Should be injected for them
+type MiddlewareFactory func(c config.RawConfig) (Middleware, error)
+type SymptomFactory func(c config.RawConfig) (Symptom, error)
 
 var registry = struct {
 	sync.Mutex

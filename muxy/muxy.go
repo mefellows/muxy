@@ -76,7 +76,8 @@ func (m *Muxy) Run() {
 			log.Fatalf("Unable to load symptom with name: %s", symptomConfig.Name)
 		}
 
-		s, err := sf()
+		// TODO: Pass in correct config block...
+		s, err := sf(nil)
 
 		if err != nil {
 			log.Fatalf("Encountered error loading symptom: %v", err)
