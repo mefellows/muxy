@@ -9,6 +9,7 @@ import (
 	"net/http/httputil"
 	"os"
 	"os/signal"
+	//"reflect"
 )
 
 const (
@@ -55,8 +56,9 @@ func (m *Muxy) Run() {
 	// Load Configuration
 	var c *config.Config
 	var err error
+	var confLoader *config.ConfigLoader
 	if m.config.ConfigFile != "" {
-		confLoader := &config.ConfigLoader{}
+		confLoader = &config.ConfigLoader{}
 		c, err = confLoader.LoadFromFile(m.config.ConfigFile)
 		if err != nil {
 			log.Fatalf("Unable to read configuration file: %s", err.Error())
@@ -76,13 +78,26 @@ func (m *Muxy) Run() {
 			log.Fatalf("Unable to load symptom with name: %s", symptomConfig.Name)
 		}
 
+		//var s interface{}
 		s, err := sf()
-
 		if err != nil {
 			log.Fatalf("Encountered error loading symptom: %v", err)
 		}
+
+		log.Printf("Symptom: %v\n", s)
+		// apply config and validate
+		err = confLoader.ApplyConfig(symptomConfig.Config, s)
+		if err != nil {
+			log.Fatalf("Encountered error applying configuration to symptom: %v", err)
+		}
+		err = confLoader.Validate(s)
+		if err != nil {
+			log.Fatalf("Encountered error validating symptom configuration: %v", err)
+		}
 		// TODO: Collapse this into the constructor, is it necessary??
-		s.Configure(&symptomConfig.Config)
+		//s.Configure(&symptomConfig.Config)
+
+		//symptoms[i] = s.(Symptom)
 		symptoms[i] = s
 	}
 

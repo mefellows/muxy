@@ -1,10 +1,14 @@
 package config
 
 import (
+	"errors"
+	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cast"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -163,4 +167,60 @@ func (cl *ConfigLoader) LoadFromFile(filename string) (*Config, error) {
 		return nil, err
 	}
 	return cl.Load(data)
+}
+func (cl *ConfigLoader) ApplyConfig(config interface{}, i interface{}) error {
+	return mapstructure.Decode(config, i)
+}
+
+// Give me a struct with field tags and i'll validate you, set defaults, etc.
+//func (cl *ConfigLoader) Validate(i interface{}, iPtr interface{}) error {
+func (cl *ConfigLoader) Validate(iface interface{}) error {
+	iValue := reflect.ValueOf(iface).Elem().Interface()
+	st := reflect.TypeOf(iValue)
+	ps := reflect.ValueOf(iValue)
+
+	// Loop all fields, set their default values if they have them and are empty
+	// Fail if mandatory fields are not set and have no value
+
+	for i := 0; i < ps.NumField(); i++ {
+		f := st.Field(i)
+		field := ps.FieldByName(f.Name)
+
+		if cast.ToBool(f.Tag.Get("required")) == true && isZero(field) {
+			defaultVal := f.Tag.Get("default")
+			if defaultVal == "" {
+				return errors.New(fmt.Sprintf("Mandatory field '%s' has not been set, and has no provided default", f.Name))
+			}
+
+			dataKind := field.Kind()
+			field = reflect.ValueOf(iface).Elem().FieldByName(f.Name)
+			switch dataKind {
+			case reflect.Bool:
+				field.SetBool(cast.ToBool(defaultVal))
+			case reflect.String:
+				field.SetString(defaultVal)
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				s, err := strconv.ParseInt(defaultVal, 10, 64)
+				if err != nil {
+					return err
+				}
+				field.SetInt(s)
+			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+				s, err := strconv.ParseUint(defaultVal, 10, 64)
+				if err != nil {
+					return err
+				}
+				field.SetUint(s)
+			default:
+				return errors.New(fmt.Sprintf("Unsupported field '%s' of type: %s", f.Name, dataKind))
+			}
+
+		}
+	}
+	return nil
+}
+
+func isZero(v reflect.Value) bool {
+	z := reflect.Zero(v.Type())
+	return v.Interface() == z.Interface()
 }

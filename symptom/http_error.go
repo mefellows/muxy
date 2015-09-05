@@ -10,7 +10,7 @@ import (
 // 50x, 40x etc.
 
 type HttpErrorSymptom struct {
-	Delay time.Duration
+	Delay time.Duration `required:"true"`
 }
 
 const DEFAULT_DELAY = 2 * time.Second
@@ -18,7 +18,7 @@ const DEFAULT_DELAY = 2 * time.Second
 func init() {
 	muxy.SymptomFactories.Register(func() (muxy.Symptom, error) {
 		return &HttpErrorSymptom{
-			Delay: DEFAULT_DELAY,
+		//Delay: DEFAULT_DELAY,
 		}, nil
 	}, "http_error")
 
