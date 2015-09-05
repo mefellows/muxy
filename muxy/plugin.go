@@ -22,7 +22,7 @@ type ProxyFactory func(protocol string) (Middleware, error)
 // TODO: Remove the burden of the plugin to have to
 //       set/configure its own config. Should be injected for them
 type MiddlewareFactory func(c config.RawConfig) (Middleware, error)
-type SymptomFactory func(c config.RawConfig) (Symptom, error)
+type SymptomFactory func() (Symptom, error)
 
 var registry = struct {
 	sync.Mutex

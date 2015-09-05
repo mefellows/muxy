@@ -2,12 +2,11 @@ package config
 
 import (
 	"fmt"
-	"github.com/spf13/cast"
 	"reflect"
 	"testing"
 )
 
-func TestFoo(t *testing.T) {
+func TestLoadConfig(t *testing.T) {
 	var data = []byte(`
 port: 8080
 name: Foo
@@ -41,25 +40,75 @@ symptoms:
 }
 
 func TestRawConfigToStruct(t *testing.T) {
+	var data = []byte(`
+port: 8080
+name: Foo
+symptoms:
+  - name: fire
+    config:
+      name: billy 
+      foo: bar
+`)
+
+	var input interface{}
+	cl := &ConfigLoader{}
+	c, _ := cl.Load([]byte(data))
+	input = c.Symptoms[0].Config
+
 	type Foo struct {
-		// requiredy, default
-		Name string `required:"true" default:""`
-		Port string `required:"true" default:"8080"`
+		Name string `required:"true" default:"" mapstructure:"name"`
+		Port int    `required:"true" default:"8081" mapstructure:"port"`
+		Foo  string `required:"true"`
 	}
 
-	var validate = func(s interface{}) {
-		st := reflect.TypeOf(s)
-		for i := 0; i < st.NumField(); i++ {
-			field := st.Field(i)
-			fmt.Printf("field: %v \n", field)
-			fmt.Printf("required: %s, default: %s\n", field.Tag.Get("required"), field.Tag.Get("default"))
-			fmt.Printf("field name: %v \n", field.Name)
-			fmt.Printf("Field value: %v \n", reflect.ValueOf(field))
-			if cast.ToBool(field.Tag.Get("required")) == true && field.Tag.Get("default") == "" {
-				fmt.Println("Required field and no default")
-			}
-		}
+	var f Foo
+
+	err := cl.ApplyConfig(input, &f)
+	if err != nil {
+		t.Fatalf("Did not expect error: %v", err)
+	}
+	err = cl.Validate(f, &f)
+	fmt.Printf("Result: %v", f)
+	if err != nil {
+		t.Fatalf("Did not expect error: %v", err)
 	}
 
-	validate(Foo{})
+	expected := Foo{Name: "billy", Port: 8081, Foo: "bar"}
+	if !reflect.DeepEqual(f, expected) {
+		t.Fatalf("Expected %v but got %v", expected, f)
+	}
+}
+
+func TestRawConfigToStructWithErrors(t *testing.T) {
+	var data = []byte(`
+port: 8080
+name: Foo
+symptoms:
+  - name: fire
+    config:
+      name: bar
+      port: 1234
+`)
+
+	var input interface{}
+	cl := &ConfigLoader{}
+	c, _ := cl.Load([]byte(data))
+	input = c.Symptoms[0].Config
+
+	type Foo struct {
+		Name string `required:"true" default:"" mapstructure:"name"`
+		Port int    `required:"true" default:"8081" mapstructure:"port"`
+		Foo  string `required:"true"`
+	}
+
+	var f Foo = Foo{}
+
+	err := cl.ApplyConfig(input, &f)
+	if err != nil {
+		t.Fatalf("Did not expect error: %v", err)
+	}
+	err = cl.Validate(f, &f)
+	if err == nil {
+		t.Fatalf("Expected error, but did not get one")
+	}
 }
