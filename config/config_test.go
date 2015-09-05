@@ -67,7 +67,7 @@ symptoms:
 	if err != nil {
 		t.Fatalf("Did not expect error: %v", err)
 	}
-	err = cl.Validate(f, &f)
+	err = cl.Validate(&f)
 	fmt.Printf("Result: %v", f)
 	if err != nil {
 		t.Fatalf("Did not expect error: %v", err)
@@ -107,7 +107,7 @@ symptoms:
 	if err != nil {
 		t.Fatalf("Did not expect error: %v", err)
 	}
-	err = cl.Validate(f, &f)
+	err = cl.Validate(&f)
 	if err == nil {
 		t.Fatalf("Expected error, but did not get one")
 	}
