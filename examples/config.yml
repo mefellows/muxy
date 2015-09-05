@@ -1,0 +1,25 @@
+name: Foo
+port: 8123
+proxy:
+  protocol: http
+  host: 0.0.0.0
+  port: 8282
+symptoms:
+#  - name: http_error
+#    config:
+#      foo: bar
+#      delay: 5
+  - name: network_shape
+    config:
+      latency: 250
+      target_bw: 750
+      default_bw: 740 
+      target_ips: 
+        - 0.0.0.0
+      #target_ips6: 
+      target_ports: 
+        - "80"
+#      target_protos: 
+#        - "tcp"
+#        - "udp"
+#        - "icmp"

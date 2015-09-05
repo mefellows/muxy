@@ -1,11 +1,11 @@
 package muxy
 
 import (
-  "github.com/mefellows/muxy/config"
+//"github.com/mefellows/muxy/config"
 )
 
 type Symptom interface {
-	Configure(c *config.RawConfig) error // Meet configurable interface
+	//Configure(c *config.RawConfig) error // Meet configurable interface
 	Setup()
 	Muck()
 	Teardown()

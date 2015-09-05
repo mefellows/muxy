@@ -10,16 +10,14 @@ import (
 // 50x, 40x etc.
 
 type HttpErrorSymptom struct {
-	Delay time.Duration `required:"true"`
+	Delay int `required:"true" default:"2"`
 }
 
 const DEFAULT_DELAY = 2 * time.Second
 
 func init() {
 	muxy.SymptomFactories.Register(func() (muxy.Symptom, error) {
-		return &HttpErrorSymptom{
-		//Delay: DEFAULT_DELAY,
-		}, nil
+		return &HttpErrorSymptom{}, nil
 	}, "http_error")
 
 }
@@ -37,11 +35,12 @@ func (m HttpErrorSymptom) Teardown() {
 	log.Println("HTTP Error Teardown()")
 }
 func (h *HttpErrorSymptom) Muck() {
-	log.Println("HTTP Error Muck(), delaying for '%v' seconds", h.Delay.Seconds())
+	delay := time.Duration(h.Delay) * time.Second
+	log.Printf("HTTP Error Muck(), delaying for %v seconds\n", delay.Seconds())
 
 	for {
 		select {
-		case <-time.After(h.Delay):
+		case <-time.After(delay):
 			return
 		}
 	}

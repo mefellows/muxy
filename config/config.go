@@ -173,7 +173,6 @@ func (cl *ConfigLoader) ApplyConfig(config interface{}, i interface{}) error {
 }
 
 // Give me a struct with field tags and i'll validate you, set defaults, etc.
-//func (cl *ConfigLoader) Validate(i interface{}, iPtr interface{}) error {
 func (cl *ConfigLoader) Validate(iface interface{}) error {
 	iValue := reflect.ValueOf(iface).Elem().Interface()
 	st := reflect.TypeOf(iValue)
@@ -199,6 +198,28 @@ func (cl *ConfigLoader) Validate(iface interface{}) error {
 				field.SetBool(cast.ToBool(defaultVal))
 			case reflect.String:
 				field.SetString(defaultVal)
+			case reflect.Slice, reflect.Array:
+				_type := field.Type().Elem()
+				_newArr := strings.Split(f.Tag.Get("default"), ",")
+
+				switch _type {
+				case reflect.TypeOf(""):
+					field.Set(reflect.ValueOf(_newArr))
+				case reflect.TypeOf(1):
+					// Convert array to int
+					intArray := make([]int, len(_newArr))
+					var err error
+					for j, val := range _newArr {
+						intArray[j], err = strconv.Atoi(val)
+						if err != nil {
+
+							return errors.New(fmt.Sprintf("Error creating default array for field '$s': %v\n", f.Name, err))
+						}
+					}
+					field.Set(reflect.ValueOf(intArray))
+				default:
+					return errors.New(fmt.Sprintf("Unsupported slice default type: %v\n", _type))
+				}
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 				s, err := strconv.ParseInt(defaultVal, 10, 64)
 				if err != nil {
@@ -221,6 +242,23 @@ func (cl *ConfigLoader) Validate(iface interface{}) error {
 }
 
 func isZero(v reflect.Value) bool {
+	switch v.Kind() {
+	case reflect.Func, reflect.Map, reflect.Slice:
+		return v.IsNil()
+	case reflect.Array:
+		z := true
+		for i := 0; i < v.Len(); i++ {
+			z = z && isZero(v.Index(i))
+		}
+		return z
+	case reflect.Struct:
+		z := true
+		for i := 0; i < v.NumField(); i++ {
+			z = z && isZero(v.Field(i))
+		}
+		return z
+	}
+	// Compare other types directly:
 	z := reflect.Zero(v.Type())
 	return v.Interface() == z.Interface()
 }

@@ -2,14 +2,12 @@ package muxy
 
 import (
 	"fmt"
-	//s "github.com/mefellows/muxy/symptom"
 	"github.com/mefellows/muxy/config"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"os"
 	"os/signal"
-	//"reflect"
 )
 
 const (
