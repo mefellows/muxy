@@ -1,7 +1,8 @@
-package muxy
+package symptom
 
 import (
 	"github.com/mefellows/muxy/config"
+	"github.com/mefellows/muxy/muxy"
 	"log"
 )
 
@@ -22,6 +23,10 @@ func (m MockSymptom) Configure(c *config.RawConfig) error {
 func (m MockSymptom) Setup() {
 	log.Println("Mock Setup()")
 	m.SetupCount = m.SetupCount + 1
+}
+
+func (m MockSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
+	log.Println("Mock HandleEvent()")
 }
 
 func (m MockSymptom) Muck() {

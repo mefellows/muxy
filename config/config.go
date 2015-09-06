@@ -139,15 +139,17 @@ func (c RawConfig) GetStringMapStringSlice(key string) map[string][]string {
 	return cast.ToStringMapStringSlice(c.Get(key))
 }
 
-type SymptomConfig struct {
+type PluginConfig struct {
 	Name   string    // Used to lookup the syptom in the plugin registry
 	Config RawConfig // Provided to the plugin on load to validate
 }
 
 type Config struct {
-	Port     string
-	Name     string
-	Symptoms []SymptomConfig //`yaml:"symptoms,inline`
+	Port       string
+	Name       string
+	Symptoms   []PluginConfig
+	Proxy      []PluginConfig
+	Middleware []PluginConfig
 }
 
 type ConfigLoader struct{}

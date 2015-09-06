@@ -18,11 +18,10 @@ type ShittyNetworkSymptom struct {
 	TargetIps6       []string `mapstructure:"target_ips6"`
 	TargetPorts      []string `mapstructure:"target_ports"`
 	TargetProtos     []string `mapstructure:"target_protos" required:"true" default:"tcp,icmp"`
-	TargetFoo        []int    `mapstructure:"target_protos" required:"true" default:"10,20,30,40"`
 }
 
 func init() {
-	muxy.SymptomFactories.Register(func() (muxy.Symptom, error) {
+	muxy.PluginFactories.Register(func() (interface{}, error) {
 		return &ShittyNetworkSymptom{}, nil
 	}, "network_shape")
 
@@ -30,7 +29,6 @@ func init() {
 
 func (s *ShittyNetworkSymptom) Setup() {
 	log.Printf("Setting up ShittyNetworkSymptom: Enabling firewall")
-	log.Printf("What's my array value? %v\n", s.TargetFoo)
 
 	s.config = throttler.Config{
 		Device:           s.Device,
@@ -47,7 +45,14 @@ func (s *ShittyNetworkSymptom) Setup() {
 	throttler.Run(&s.config)
 }
 
-func (s *ShittyNetworkSymptom) Muck() {
+func (m ShittyNetworkSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
+	switch e {
+	case muxy.EVENT_PRE_DISPATCH:
+		m.Muck(ctx)
+	}
+}
+
+func (s *ShittyNetworkSymptom) Muck(ctx *muxy.Context) {
 	log.Printf("Mucking...")
 }
 

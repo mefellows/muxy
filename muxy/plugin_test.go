@@ -1,29 +1,18 @@
 package muxy
 
 import (
+	"log"
 	"testing"
 )
 
-var SymptomMockFunc = func() (Symptom, error) {
+var MiddlewareMockFunc = func() (interface{}, error) {
 	return MockSymptom{}, nil
 }
 
-func TestFactoryAll(t *testing.T) {
-	SymptomFactories.Register(SymptomMockFunc, "screwything")
-
-	symptoms := SymptomFactories.All()
-	for _, sym := range symptoms {
-		f, _ := sym()
-		if _, ok := f.(Symptom); !ok {
-			t.Fatalf("must be a Symptom")
-		}
-
-	}
-}
 func TestLookupFactory(t *testing.T) {
-	SymptomFactories.Register(SymptomMockFunc, "screwything")
+	PluginFactories.Register(MiddlewareMockFunc, "screwything")
 
-	f, ok := SymptomFactories.Lookup("screwything")
+	f, ok := PluginFactories.Lookup("screwything")
 
 	if !ok {
 		t.Fatalf("Expected lookup to be OK")
@@ -38,4 +27,31 @@ func TestLookupFactory(t *testing.T) {
 	if sym == nil {
 		t.Fatalf("Expected symptom not to be nil")
 	}
+}
+
+type MockSymptom struct {
+	ConfigureError error
+	ConfigureCount int
+	MuckCount      int
+	TeardownCount  int
+	SetupCount     int
+}
+
+func (m MockSymptom) Setup() {
+	log.Println("Mock Setup()")
+	m.SetupCount = m.SetupCount + 1
+}
+
+func (m MockSymptom) HandleEvent(e ProxyEvent, ctx *Context) {
+	log.Println("Mock HandleEvent()")
+}
+
+func (m MockSymptom) Muck() {
+	log.Println("Mock Muck()")
+	m.MuckCount = m.MuckCount + 1
+}
+
+func (m MockSymptom) Teardown() {
+	log.Println("Mock Teardown()")
+	m.TeardownCount = m.TeardownCount + 1
 }

@@ -5,6 +5,7 @@ package muxy
 
 import (
 	"github.com/mefellows/muxy/config"
+	"log"
 	"reflect"
 	"runtime"
 	"strings"
@@ -17,12 +18,7 @@ import (
 //
 
 // Extension type for adding new plugins
-type ProxyFactory func(protocol string) (Middleware, error)
-
-// TODO: Remove the burden of the plugin to have to
-//       set/configure its own config. Should be injected for them
-type MiddlewareFactory func(c config.RawConfig) (Middleware, error)
-type SymptomFactory func() (Symptom, error)
+type PluginFactory func() (interface{}, error)
 
 var registry = struct {
 	sync.Mutex
@@ -135,44 +131,59 @@ func Unregister(name string) []string {
 	return ifaces
 }
 
-// SymptomFactory
-
-var SymptomFactories = &symptomFactory{
-	newPlugin(new(SymptomFactory)),
+// Plugin Factories
+var PluginFactories = &pluginFactory{
+	newPlugin(new(PluginFactory)),
 }
 
-type symptomFactory struct {
+type pluginFactory struct {
 	*plugin
 }
 
-func (p *symptomFactory) Unregister(name string) bool {
+func (p *pluginFactory) Unregister(name string) bool {
 	return p.unregister(name)
 }
 
-func (p *symptomFactory) Register(component SymptomFactory, name string) bool {
+func (p *pluginFactory) Register(component PluginFactory, name string) bool {
 	return p.register(component, name)
 }
 
-func (p *symptomFactory) Lookup(name string) (SymptomFactory, bool) {
+func (p *pluginFactory) Lookup(name string) (PluginFactory, bool) {
 	ext, ok := p.lookup(name)
 	if !ok {
 		return nil, ok
 	}
-	return ext.(SymptomFactory), ok
+	return ext.(PluginFactory), ok
 }
 
-func (p *symptomFactory) All() map[string]SymptomFactory {
-	all := make(map[string]SymptomFactory)
-	for k, v := range p.all() {
-		all[k] = v.(SymptomFactory)
-	}
-	return all
-}
+func LoadPluginsWithConfig(cl *config.ConfigLoader, pluginConfigs []config.PluginConfig) []interface{} {
+	plugins := make([]interface{}, len(pluginConfigs))
+	for i, pluginConfig := range pluginConfigs {
+		log.Printf("[DEBUG] Loading plugin: %s", pluginConfig.Name)
+		sf, ok := PluginFactories.Lookup(pluginConfig.Name)
 
-func (p *symptomFactory) Names() []string {
-	var names []string
-	for k := range p.all() {
-		names = append(names, k)
+		if !ok {
+			log.Fatalf("Unable to load plugin with name: %s", pluginConfig.Name)
+		}
+
+		s, err := sf()
+		if err != nil {
+			log.Fatalf("Encountered error loading plugin: %v", err)
+		}
+
+		log.Printf("plugin: %v\n", s)
+		// apply config and validate
+		err = cl.ApplyConfig(pluginConfig.Config, s)
+		if err != nil {
+			log.Fatalf("Encountered error applying configuration to plugin: %v", err)
+		}
+		err = cl.Validate(s)
+		if err != nil {
+			log.Fatalf("Encountered error validating plugin configuration: %v", err)
+		}
+
+		plugins[i] = s
 	}
-	return names
+
+	return plugins
 }

@@ -1,4 +1,7 @@
 package muxy
 
-type ProxyProtocol interface {
+type Proxy interface {
+	Setup([]Middleware)
+	Proxy()
+	Teardown()
 }

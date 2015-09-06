@@ -16,7 +16,7 @@ type HttpErrorSymptom struct {
 const DEFAULT_DELAY = 2 * time.Second
 
 func init() {
-	muxy.SymptomFactories.Register(func() (muxy.Symptom, error) {
+	muxy.PluginFactories.Register(func() (interface{}, error) {
 		return &HttpErrorSymptom{}, nil
 	}, "http_error")
 
@@ -34,7 +34,15 @@ func (m HttpErrorSymptom) Setup() {
 func (m HttpErrorSymptom) Teardown() {
 	log.Println("HTTP Error Teardown()")
 }
-func (h *HttpErrorSymptom) Muck() {
+
+func (m HttpErrorSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
+	switch e {
+	case muxy.EVENT_PRE_DISPATCH:
+		m.Muck(ctx)
+	}
+}
+
+func (h *HttpErrorSymptom) Muck(ctx *muxy.Context) {
 	delay := time.Duration(h.Delay) * time.Second
 	log.Printf("HTTP Error Muck(), delaying for %v seconds\n", delay.Seconds())
 
