@@ -5,7 +5,6 @@ import (
 	"github.com/mefellows/muxy/muxy"
 	"log"
 	"net/http"
-	"net/http/httputil"
 )
 
 type HttpProxy struct {
@@ -34,19 +33,13 @@ func (p *HttpProxy) Teardown() {
 func (p *HttpProxy) Proxy() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		context := &muxy.Context{Request: r, Response: &w}
 		director := func(req *http.Request) {
 			req = r
 			req.URL.Scheme = p.ProxyProtocol
 			req.URL.Host = fmt.Sprintf("%s:%d", p.ProxyHost, p.ProxyPort)
 		}
 		log.Println("Request received")
-
-		for _, m := range p.middleware {
-			m.HandleEvent(muxy.EVENT_PRE_DISPATCH, context)
-		}
-
-		proxy := &httputil.ReverseProxy{Director: director}
+		proxy := &ReverseProxy{Director: director, Middleware: p.middleware}
 		proxy.ServeHTTP(w, r)
 	})
 	err := http.ListenAndServe(fmt.Sprintf("%s:%d", p.Host, p.Port), mux)

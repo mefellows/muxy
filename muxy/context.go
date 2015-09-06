@@ -8,6 +8,6 @@ import (
 
 type Context struct {
 	Request  *http.Request
-	Response *http.ResponseWriter
+	Response *http.Response
 	Bytes    []byte
 }

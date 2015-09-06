@@ -38,6 +38,7 @@ func (m HttpErrorSymptom) Teardown() {
 func (m HttpErrorSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
 	case muxy.EVENT_PRE_DISPATCH:
+		log.Printf("Handle pre-dispatch\n")
 		m.Muck(ctx)
 	}
 }
