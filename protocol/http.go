@@ -14,7 +14,7 @@ type HttpProxy struct {
 	Protocol      string `default:"http" required:"true"`
 	ProxyHost     string `required:"true" mapstructure:"proxy_host"`
 	ProxyPort     int    `required:"true" mapstructure:"proxy_port"`
-	ProxyProtocol string `required:"true" default:"http" mapstructure:"proxy_protocal"`
+	ProxyProtocol string `required:"true" default:"http" mapstructure:"proxy_protocol"`
 	middleware    []muxy.Middleware
 }
 
