@@ -1,5 +1,6 @@
-name: Foo
-port: 8123
+name: Network and HTTP screwer.
+description: Slow network to mobile levels, and add 1s delay to all messages
+loglevel: 1 # Debug
 proxy:
   - name: http_proxy
     config:
@@ -8,6 +9,7 @@ proxy:
       proxy_host: 0.0.0.0
       proxy_port: 8282
 middleware:
+  - name: logger
   - name: http_error
     config:
       foo: bar

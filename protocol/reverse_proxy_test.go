@@ -258,10 +258,6 @@ func TestReverseProxyCancellation(t *testing.T) {
 
 	proxyHandler := NewSingleHostReverseProxy(backendURL)
 
-	// Discards errors of the form:
-	// http: proxy error: read tcp 127.0.0.1:44643: use of closed network connection
-	proxyHandler.ErrorLog = log.New(ioutil.Discard, "", 0)
-
 	frontend := httptest.NewServer(proxyHandler)
 	defer frontend.Close()
 

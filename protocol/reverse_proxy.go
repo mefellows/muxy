@@ -7,9 +7,9 @@
 package protocol
 
 import (
+	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -49,12 +49,6 @@ type ReverseProxy struct {
 	// response body.
 	// If zero, no periodic flushing is done.
 	FlushInterval time.Duration
-
-	// ErrorLog specifies an optional logger for errors
-	// that occur when attempting to proxy the request.
-	// If nil, logging goes to os.Stderr via the log package's
-	// standard logger.
-	ErrorLog *log.Logger
 }
 
 func singleJoiningSlash(a, b string) string {
@@ -204,7 +198,7 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 	res, err := transport.RoundTrip(outreq)
 	if err != nil {
-		log.Printf("http: proxy error: %v", err)
+		log.Error("http: proxy error: %v", err)
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}

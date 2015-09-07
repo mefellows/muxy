@@ -2,9 +2,9 @@ package protocol
 
 import (
 	"fmt"
+	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 	"github.com/mefellows/plugo/plugo"
-	"log"
 	"net/http"
 )
 
@@ -39,12 +39,11 @@ func (p *HttpProxy) Proxy() {
 			req.URL.Scheme = p.ProxyProtocol
 			req.URL.Host = fmt.Sprintf("%s:%d", p.ProxyHost, p.ProxyPort)
 		}
-		log.Println("Request received")
 		proxy := &ReverseProxy{Director: director, Middleware: p.middleware}
 		proxy.ServeHTTP(w, r)
 	})
 	err := http.ListenAndServe(fmt.Sprintf("%s:%d", p.Host, p.Port), mux)
 	if err != nil {
-		log.Println(fmt.Sprintf("ListenAndServe error: ", err))
+		log.Info("ListenAndServe error: ", err.Error())
 	}
 }

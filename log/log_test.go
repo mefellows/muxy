@@ -1,4 +1,4 @@
-package muxy
+package log
 
 import (
 	"log"
@@ -49,6 +49,6 @@ func TestLogLevel(t *testing.T) {
 }
 func TestLogColour(t *testing.T) {
 	logger := &MuxyLogger{Level: DEBUG}
-	logger.Log(INFO, "Info %s", logger.Colorize(LIGHTRED, " some words "))
+	logger.Log(INFO, "Info %s", Colorize(LIGHTRED, " some words "))
 	logger.Log(INFO, "Info something else not in colour")
 }

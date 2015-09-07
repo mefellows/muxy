@@ -1,10 +1,14 @@
 package symptom
 
 import (
+	"bytes"
+	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 	"github.com/mefellows/plugo/plugo"
 	"github.com/tylertreat/comcast/throttler"
-	"log"
+	"io"
+	l "log"
+	"os"
 )
 
 // Shape bandwidth to mobile, slower speeds
@@ -19,6 +23,8 @@ type ShittyNetworkSymptom struct {
 	TargetIps6       []string `mapstructure:"target_ips6"`
 	TargetPorts      []string `mapstructure:"target_ports"`
 	TargetProtos     []string `mapstructure:"target_protos" required:"true" default:"tcp,icmp"`
+	out              io.Writer
+	err              io.Writer
 }
 
 func init() {
@@ -29,7 +35,7 @@ func init() {
 }
 
 func (s *ShittyNetworkSymptom) Setup() {
-	log.Printf("Setting up ShittyNetworkSymptom: Enabling firewall")
+	log.Debug("Setting up ShittyNetworkSymptom: Enabling firewall")
 
 	s.config = throttler.Config{
 		Device:           s.Device,
@@ -43,7 +49,11 @@ func (s *ShittyNetworkSymptom) Setup() {
 		TargetProtos:     s.TargetProtos,
 		DryRun:           false,
 	}
-	throttler.Run(&s.config)
+
+	supressOutput(func() {
+		throttler.Run(&s.config)
+	})
+
 }
 
 func (m ShittyNetworkSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
@@ -54,11 +64,39 @@ func (m ShittyNetworkSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) 
 }
 
 func (s *ShittyNetworkSymptom) Muck(ctx *muxy.Context) {
-	log.Printf("Mucking...")
+	log.Debug("ShittyNetworkSymptom Mucking...")
 }
 
 func (s *ShittyNetworkSymptom) Teardown() {
-	log.Printf("Tearing down ShittyNetworkSymptom")
+	log.Debug("Tearing down ShittyNetworkSymptom")
 	s.config.Stop = true
-	throttler.Run(&s.config)
+	supressOutput(func() {
+		throttler.Run(&s.config)
+	})
+}
+
+// Supress output of function to keep logs clean
+func supressOutput(f func()) {
+	old := os.Stdout
+	oldErr := os.Stderr
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	os.Stderr = w
+	l.SetOutput(w)
+
+	f()
+
+	outC := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		outC <- buf.String()
+	}()
+
+	// back to normal state
+	w.Close()
+	os.Stdout = old
+	os.Stderr = oldErr
+	l.SetOutput(old)
 }

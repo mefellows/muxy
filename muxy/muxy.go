@@ -1,8 +1,8 @@
 package muxy
 
 import (
+	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/plugo/plugo"
-	"log"
 	"os"
 	"os/signal"
 )
@@ -14,6 +14,7 @@ type MuxyConfig struct {
 type PluginConfig struct {
 	Name        string
 	Description string
+	LogLevel    int `default:"2" required:"true" mapstructure:"loglevel"`
 	Proxy       []plugo.PluginConfig
 	Middleware  []plugo.PluginConfig
 }
@@ -47,13 +48,12 @@ func (m *Muxy) Run() {
 
 	// Start proxy
 	for _, proxy := range m.proxies {
-		log.Printf("[DEBUG] starting Proxy: %v\n", proxy)
 		go proxy.Proxy()
 	}
 
 	// Block until a signal is received.
 	<-sigChan
-	log.Println("Shutting down Muxy...")
+	log.Info("Shutting down Muxy...")
 
 	for _, m := range m.middlewares {
 		m.Teardown()
@@ -75,16 +75,20 @@ func (m *Muxy) LoadPlugins() {
 		log.Fatal("No config file provided")
 	}
 
+	log.SetLevel(log.LogLevel(c.LogLevel))
+
 	// Load all plugins
 	m.middlewares = make([]Middleware, len(c.Middleware))
 	plugins := plugo.LoadPluginsWithConfig(confLoader, c.Middleware)
 	for i, p := range plugins {
+		log.Info("Loading plugin \t" + log.Colorize(log.YELLOW, c.Middleware[i].Name))
 		m.middlewares[i] = p.(Middleware)
 	}
 
 	m.proxies = make([]Proxy, len(c.Proxy))
 	plugins = plugo.LoadPluginsWithConfig(confLoader, c.Proxy)
 	for i, p := range plugins {
+		log.Info("Loading proxy \t" + log.Colorize(log.YELLOW, c.Proxy[i].Name))
 		m.proxies[i] = p.(Proxy)
 		m.proxies[i].Setup(m.middlewares)
 	}

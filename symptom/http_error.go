@@ -1,9 +1,9 @@
 package symptom
 
 import (
+	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 	"github.com/mefellows/plugo/plugo"
-	"log"
 	"time"
 )
 
@@ -22,24 +22,23 @@ func init() {
 }
 
 func (m HttpErrorSymptom) Setup() {
-	log.Println("HTTP Error Setup()")
+	log.Debug("HTTP Error Setup()")
 }
 
 func (m HttpErrorSymptom) Teardown() {
-	log.Println("HTTP Error Teardown()")
+	log.Debug("HTTP Error Teardown()")
 }
 
 func (m HttpErrorSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
 	case muxy.EVENT_PRE_DISPATCH:
-		log.Printf("Handle pre-dispatch\n")
 		m.Muck(ctx)
 	}
 }
 
 func (h *HttpErrorSymptom) Muck(ctx *muxy.Context) {
 	delay := time.Duration(h.Delay) * time.Second
-	log.Printf("HTTP Error Muck(), delaying for %v seconds\n", delay.Seconds())
+	log.Debug("HTTP Error Muck(), delaying for %v seconds\n", delay.Seconds())
 
 	for {
 		select {
