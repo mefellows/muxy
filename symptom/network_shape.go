@@ -2,6 +2,7 @@ package symptom
 
 import (
 	"github.com/mefellows/muxy/muxy"
+	"github.com/mefellows/plugo/plugo"
 	"github.com/tylertreat/comcast/throttler"
 	"log"
 )
@@ -21,7 +22,7 @@ type ShittyNetworkSymptom struct {
 }
 
 func init() {
-	muxy.PluginFactories.Register(func() (interface{}, error) {
+	plugo.PluginFactories.Register(func() (interface{}, error) {
 		return &ShittyNetworkSymptom{}, nil
 	}, "network_shape")
 

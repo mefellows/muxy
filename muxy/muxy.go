@@ -1,15 +1,21 @@
 package muxy
 
 import (
-	"github.com/mefellows/muxy/config"
+	"github.com/mefellows/plugo/plugo"
 	"log"
 	"os"
 	"os/signal"
 )
 
 type MuxyConfig struct {
-	RawConfig  *config.RawConfig
+	RawConfig  *plugo.RawConfig
 	ConfigFile string // Path to YAML Configuration File
+}
+type PluginConfig struct {
+	Name        string
+	Description string
+	Proxy       []plugo.PluginConfig
+	Middleware  []plugo.PluginConfig
 }
 
 type Muxy struct {
@@ -56,12 +62,12 @@ func (m *Muxy) Run() {
 
 func (m *Muxy) LoadPlugins() {
 	// Load Configuration
-	var c *config.Config
 	var err error
-	var confLoader *config.ConfigLoader
+	var confLoader *plugo.ConfigLoader
+	c := &PluginConfig{}
 	if m.config.ConfigFile != "" {
-		confLoader = &config.ConfigLoader{}
-		c, err = confLoader.LoadFromFile(m.config.ConfigFile)
+		confLoader = &plugo.ConfigLoader{}
+		err = confLoader.LoadFromFile(m.config.ConfigFile, &c)
 		if err != nil {
 			log.Fatalf("Unable to read configuration file: %s", err.Error())
 		}
@@ -71,13 +77,13 @@ func (m *Muxy) LoadPlugins() {
 
 	// Load all plugins
 	m.middlewares = make([]Middleware, len(c.Middleware))
-	plugins := LoadPluginsWithConfig(confLoader, c.Middleware)
+	plugins := plugo.LoadPluginsWithConfig(confLoader, c.Middleware)
 	for i, p := range plugins {
 		m.middlewares[i] = p.(Middleware)
 	}
 
 	m.proxies = make([]Proxy, len(c.Proxy))
-	plugins = LoadPluginsWithConfig(confLoader, c.Proxy)
+	plugins = plugo.LoadPluginsWithConfig(confLoader, c.Proxy)
 	for i, p := range plugins {
 		m.proxies[i] = p.(Proxy)
 		m.proxies[i].Setup(m.middlewares)

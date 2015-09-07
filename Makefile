@@ -15,6 +15,13 @@ testrace:
 	go test -race $(TEST) $(TESTARGS)
 
 updatedeps:
-	go get -d -v -p 2 ./...
+	go get -u github.com/mitchellh/gox
+	go get -u golang.org/x/tools/cmd/stringer
+	go list ./... \
+		| xargs go list -f '{{join .Deps "\n"}}' \
+		| grep -v github.com/mefellows/muxy \
+		| grep -v '/internal/' \
+		| sort -u \
+		| xargs go get -f -u -v
 
 .PHONY: bin default dev test updatedeps

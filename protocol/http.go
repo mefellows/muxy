@@ -3,6 +3,7 @@ package protocol
 import (
 	"fmt"
 	"github.com/mefellows/muxy/muxy"
+	"github.com/mefellows/plugo/plugo"
 	"log"
 	"net/http"
 )
@@ -18,7 +19,7 @@ type HttpProxy struct {
 }
 
 func init() {
-	muxy.PluginFactories.Register(func() (interface{}, error) {
+	plugo.PluginFactories.Register(func() (interface{}, error) {
 		return &HttpProxy{}, nil
 	}, "http_proxy")
 }

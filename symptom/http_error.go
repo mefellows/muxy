@@ -1,8 +1,8 @@
 package symptom
 
 import (
-	"github.com/mefellows/muxy/config"
 	"github.com/mefellows/muxy/muxy"
+	"github.com/mefellows/plugo/plugo"
 	"log"
 	"time"
 )
@@ -16,15 +16,9 @@ type HttpErrorSymptom struct {
 const DEFAULT_DELAY = 2 * time.Second
 
 func init() {
-	muxy.PluginFactories.Register(func() (interface{}, error) {
+	plugo.PluginFactories.Register(func() (interface{}, error) {
 		return &HttpErrorSymptom{}, nil
 	}, "http_error")
-
-}
-
-func (m HttpErrorSymptom) Configure(c *config.RawConfig) error {
-	log.Println("HTTP Error Configure()")
-	return nil
 }
 
 func (m HttpErrorSymptom) Setup() {

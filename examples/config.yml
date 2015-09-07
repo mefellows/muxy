@@ -12,17 +12,17 @@ middleware:
     config:
       foo: bar
       delay: 1
-  # - name: network_shape
-  #   config:
-  #     latency: 250
-  #     target_bw: 750
-  #     default_bw: 740 
-  #     target_ips: 
-  #       - 0.0.0.0
-  #     #target_ips6: 
-  #     target_ports: 
-  #       - "80"
-  #     target_protos: 
-  #       - "tcp"
-  #       - "udp"
-  #       - "icmp"
+  - name: network_shape
+    config:
+      latency: 250
+      target_bw: 750
+      default_bw: 740 
+      target_ips: 
+        - 0.0.0.0
+      #target_ips6: 
+      target_ports: 
+        - "80"
+      target_protos: 
+        - "tcp"
+        - "udp"
+        - "icmp"
