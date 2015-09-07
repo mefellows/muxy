@@ -37,6 +37,7 @@ func (LoggerMiddleware) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 				log.Colorize(log.BLUE, " \""+ctx.Request.URL.String()+"\""))
 		}
 	case muxy.EVENT_POST_DISPATCH:
+	case muxy.EVENT_PRE_RESPONSE:
 		if ctx.Request == nil {
 			if len(ctx.Bytes) > 0 {
 				log.Info("Handle TCP event " + log.Colorize(log.GREY, "POST_DISPATCH") + " Returning " + string(ctx.Bytes))

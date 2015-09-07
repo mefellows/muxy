@@ -112,6 +112,7 @@ func (m *MuxyLogger) Fatalf(format string, v ...interface{}) {
 func (m *MuxyLogger) Log(l LogLevel, format string, v ...interface{}) {
 	if l >= m.Level {
 		var level string
+		var colorFormat = ""
 		switch l {
 		case TRACE:
 			level = "TRACE"
@@ -123,10 +124,12 @@ func (m *MuxyLogger) Log(l LogLevel, format string, v ...interface{}) {
 			level = "WARN"
 		case ERROR:
 			level = "ERROR"
+			colorFormat = coloursMap[LIGHTRED]
 		case FATAL:
 			level = "FATAL"
+			colorFormat = coloursMap[LIGHTRED]
 		}
-		log.Printf("["+level+"]\t\t"+format+"\n", v...)
+		log.Printf("["+level+"]\t\t"+colorFormat+format+ansi.Reset+"\n", v...)
 	}
 }
 
