@@ -41,8 +41,6 @@ func (p *TcpProxy) Teardown() {
 }
 
 func (p *TcpProxy) Proxy() {
-	log.Info("Proxying from blah to blah")
-
 	log.Trace("Checking connection: %s:%d", p.Host, p.Port)
 	laddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", p.Host, p.Port))
 	check(err)
@@ -51,9 +49,6 @@ func (p *TcpProxy) Proxy() {
 	check(err)
 	listener, err := net.ListenTCP("tcp", laddr)
 	check(err)
-
-	//matcher := createMatcher(*match)
-	//replacer := createReplacer(*replace)
 
 	for {
 		conn, err := listener.AcceptTCP()
@@ -69,8 +64,6 @@ func (p *TcpProxy) Proxy() {
 			raddr:      raddr,
 			erred:      false,
 			errsig:     make(chan bool),
-			rdonesig:   make(chan bool),
-			wdonesig:   make(chan bool),
 			prefix:     fmt.Sprintf("Connection #%03d ", p.connId),
 			hex:        p.HexOutput,
 			nagles:     p.NaglesAlgorithm,
@@ -92,8 +85,6 @@ type proxy struct {
 	protocol      string
 	erred         bool
 	errsig        chan bool
-	rdonesig      chan bool
-	wdonesig      chan bool
 	prefix        string
 	matcher       func([]byte)
 	replacer      func([]byte) []byte
@@ -107,11 +98,8 @@ func (p *proxy) err(s string, err error) {
 	}
 	if err != io.EOF {
 		log.Warn(p.prefix+s, err)
-		p.errsig <- true
-	} else {
-		p.rdonesig <- true
-		p.wdonesig <- true
 	}
+	p.errsig <- true
 	p.erred = true
 }
 
@@ -140,46 +128,26 @@ func (p *proxy) start() {
 	go p.pipe(p.lconn, p.rconn)
 	go p.pipe(p.rconn, p.lconn)
 	//wait for close...
-	//<-p.errsig
-	<-p.rdonesig
-	<-p.wdonesig
+	<-p.errsig
 	log.Info("Closed (%d bytes sent, %d bytes received)", p.sentBytes, p.receivedBytes)
 }
 
 func (p *proxy) pipe(src io.Reader, dst io.Writer) {
-	//data direction
-	var f, h string
+	// Direction
 	islocal := src == p.lconn
-	var doneChan chan bool
-	if islocal {
-		f = ">>> %d bytes sent%s"
-		doneChan = p.rdonesig
-	} else {
-		f = "<<< %d bytes received%s"
-		doneChan = p.wdonesig
-	}
-	//output hex?
-	if p.hex {
-		h = "%x"
-	} else {
-		h = "%s"
-	}
 
-	//directional copy (64k buffer)
 	buff := make([]byte, 0xffff)
-	for {
+	done := false
+	for !done {
 		n, readErr := src.Read(buff)
-		// Failing too early - if EOF is in only/first frame,
-		// then NO response comes back
+		if readErr != nil || n == 0 {
+			if !islocal {
+				p.err("Read failed '%s'\n", readErr)
+			}
+			done = true
+		}
+
 		b := buff[:n]
-		//execute match
-		if p.matcher != nil {
-			p.matcher(b)
-		}
-		//execute replace
-		if p.replacer != nil {
-			b = p.replacer(b)
-		}
 
 		ctx := &muxy.Context{Bytes: b}
 		for _, middleware := range p.middleware {
@@ -190,15 +158,10 @@ func (p *proxy) pipe(src io.Reader, dst io.Writer) {
 			}
 		}
 
-		log.Trace(f, n, "\n"+log.Colorize(log.BLUE, fmt.Sprintf(h, b)))
-		log.Debug(f, n, "")
-
-		//write out result
 		n, err := dst.Write(b)
 		if err != nil {
 			log.Error("Write failed: %s", err.Error())
 			p.err("Write failed '%s'\n", err)
-			doneChan <- true
 
 			return
 		}
@@ -206,14 +169,6 @@ func (p *proxy) pipe(src io.Reader, dst io.Writer) {
 			p.sentBytes += uint64(n)
 		} else {
 			p.receivedBytes += uint64(n)
-		}
-
-		if readErr != nil {
-			log.Info("Buffer: %s", buff)
-			log.Error("Read failed: %s", readErr.Error())
-			doneChan <- true
-			//p.err("Read failed '%s'\n", readErr)
-			return
 		}
 	}
 }

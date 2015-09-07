@@ -9,7 +9,6 @@ proxy:
       proxy_host: 0.0.0.0
       proxy_port: 2000
       nagles_algorithm: true
-      hex_output: true
   # - name: http_proxy
   #   config:
   #     host: 0.0.0.0
@@ -18,6 +17,8 @@ proxy:
   #     proxy_port: 8282
 middleware:
   - name: logger
+    config:
+      hex_output: true
   # - name: http_error
   #   config:
   #     foo: bar
