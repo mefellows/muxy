@@ -192,7 +192,7 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Fire Pre-dispatch middleware event
-	ctx := &muxy.Context{req, nil, nil}
+	ctx := &muxy.Context{Request: req}
 	for _, middleware := range p.Middleware {
 		middleware.HandleEvent(muxy.EVENT_PRE_DISPATCH, ctx)
 	}
@@ -205,13 +205,9 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	defer res.Body.Close()
 
 	// Fire Post-dispatch middleware event
-	ctx = &muxy.Context{req, res, nil}
+	ctx = &muxy.Context{req, res, rw, nil}
 	for _, middleware := range p.Middleware {
 		middleware.HandleEvent(muxy.EVENT_POST_DISPATCH, ctx)
-	}
-
-	for _, h := range hopHeaders {
-		res.Header.Del(h)
 	}
 
 	copyHeader(rw.Header(), res.Header)
@@ -235,6 +231,7 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			fl.Flush()
 		}
 	}
+
 	p.copyResponse(rw, res.Body)
 	res.Body.Close() // close now, instead of defer, to populate res.Trailer
 	copyHeader(rw.Header(), res.Trailer)

@@ -48,7 +48,6 @@ func (l *LoggerMiddleware) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 				log.Colorize(log.BLUE, " \""+ctx.Request.URL.String()+"\""))
 		}
 	case muxy.EVENT_POST_DISPATCH:
-	case muxy.EVENT_PRE_RESPONSE:
 		if ctx.Request == nil {
 			if len(ctx.Bytes) > 0 {
 				log.Info("Handle TCP event " + log.Colorize(log.GREY, "POST_DISPATCH") + fmt.Sprintf(" Sent %d%s", len(ctx.Bytes), " bytes"))
@@ -56,8 +55,8 @@ func (l *LoggerMiddleware) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 				log.Debug("Handle TCP event " + log.Colorize(log.GREY, "POST_DISPATCH") + " Sent response: " + bytesTab + log.Colorize(log.BLUE, data))
 			}
 		} else {
-			log.Info("Handle HTTP event " + log.Colorize(log.GREY, "PRE_DISPATCH") + " Returning " +
-				log.Colorize(log.GREY, ctx.Response.Status))
+			log.Info("Handle HTTP event " + log.Colorize(log.GREY, "POST_DISPATCH") + " Returning " +
+				log.Colorize(log.GREY, fmt.Sprintf("%d %s", ctx.Response.StatusCode, ctx.Response.Status)))
 		}
 	}
 }

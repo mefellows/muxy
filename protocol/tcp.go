@@ -16,6 +16,7 @@ type TcpProxy struct {
 	ProxyPort       int    `required:"true" mapstructure:"proxy_port"`
 	NaglesAlgorithm bool   `mapstructure:"nagles_algorithm"`
 	HexOutput       bool   `mapstructure:"hex_output"`
+	PacketSize      int    `mapstructure:"packet_size" default:"64" required:"true"`
 	matchId         uint64
 	connId          uint64
 	middleware      []muxy.Middleware
@@ -62,6 +63,7 @@ func (p *TcpProxy) Proxy() {
 			lconn:      conn,
 			laddr:      laddr,
 			raddr:      raddr,
+			packetsize: p.PacketSize,
 			erred:      false,
 			errsig:     make(chan bool),
 			prefix:     fmt.Sprintf("Connection #%03d ", p.connId),
@@ -90,6 +92,7 @@ type proxy struct {
 	replacer      func([]byte) []byte
 	nagles        bool
 	hex           bool
+	packetsize    int
 }
 
 func (p *proxy) err(s string, err error) {
@@ -136,7 +139,7 @@ func (p *proxy) pipe(src io.Reader, dst io.Writer) {
 	// Direction
 	islocal := src == p.lconn
 
-	buff := make([]byte, 0xffff)
+	buff := make([]byte, p.packetsize)
 	done := false
 	for !done {
 		n, readErr := src.Read(buff)

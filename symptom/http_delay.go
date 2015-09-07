@@ -7,9 +7,7 @@ import (
 	"time"
 )
 
-// 50x, 40x etc.
-
-type HttpErrorSymptom struct {
+type HttpDelaySymptom struct {
 	Delay int `required:"true" default:"2"`
 }
 
@@ -17,28 +15,28 @@ const DEFAULT_DELAY = 2 * time.Second
 
 func init() {
 	plugo.PluginFactories.Register(func() (interface{}, error) {
-		return &HttpErrorSymptom{}, nil
-	}, "http_error")
+		return &HttpDelaySymptom{}, nil
+	}, "http_delay")
 }
 
-func (m HttpErrorSymptom) Setup() {
-	log.Debug("HTTP Error Setup()")
+func (m HttpDelaySymptom) Setup() {
+	log.Debug("HTTP Delay Setup()")
 }
 
-func (m HttpErrorSymptom) Teardown() {
-	log.Debug("HTTP Error Teardown()")
+func (m HttpDelaySymptom) Teardown() {
+	log.Debug("HTTP Delay Teardown()")
 }
 
-func (m HttpErrorSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
+func (m HttpDelaySymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
 	case muxy.EVENT_PRE_DISPATCH:
 		m.Muck(ctx)
 	}
 }
 
-func (h *HttpErrorSymptom) Muck(ctx *muxy.Context) {
+func (h *HttpDelaySymptom) Muck(ctx *muxy.Context) {
 	delay := time.Duration(h.Delay) * time.Second
-	log.Debug("HTTP Error Muck(), delaying for %v seconds\n", delay.Seconds())
+	log.Debug("HTTP Delay Muck(), delaying for %v seconds\n", delay.Seconds())
 
 	for {
 		select {

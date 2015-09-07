@@ -2,26 +2,33 @@ name: Network and HTTP screwer.
 description: Slow network to mobile levels, and add 1s delay to all messages
 loglevel: 0 # Debug
 proxy:
-  - name: tcp_proxy
-    config:
-      host: 0.0.0.0
-      port: 8181
-      proxy_host: 0.0.0.0
-      proxy_port: 2000
-      nagles_algorithm: true
-  # - name: http_proxy
+  # - name: tcp_proxy
   #   config:
   #     host: 0.0.0.0
   #     port: 8181
   #     proxy_host: 0.0.0.0
-  #     proxy_port: 8282
+  #     proxy_port: 2000
+  #     nagles_algorithm: true
+  #     packet_size: 64
+  - name: http_proxy
+    config:
+      host: 0.0.0.0
+      port: 8181
+      proxy_host: 0.0.0.0
+      proxy_port: 8282
 middleware:
+  - name: http_tamperer
+    config:
+      status: 401
+      headers:
+        # content_length: "27"
+        x_foo_bar: "baz"
+      body: "This is a very long sentence that spans several lines in the YAML but which will be rendered as a string without carriage returns."
   - name: logger
     config:
       hex_output: true
-  # - name: http_error
+  # - name: http_delay
   #   config:
-  #     foo: bar
   #     delay: 1
   # - name: network_shape
   #   config:
