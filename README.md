@@ -30,6 +30,11 @@ If you are building a distributed system, Muxy can help you test your resilience
 
 ## Features
 
+* Ability to tamper with network devices at the transport level (Layer 4) 
+* ...and HTTP requests/responses at the HTTP protocol level (Layer 7)
+* Simulate real-world network connectivity problems/partitions for mobile devices, distributed systemss etc.
+* Ideal for use in CI/Test Suites to test resilience across languages/technologies
+* Simple native binary installation - no dependencies
 
 ## Installation
 
@@ -181,7 +186,7 @@ middleware:
 #### Network Shaper
 
 The network shaper plugin is a Layer 4 tamperer, and requires *root access* to work, as it needs to configure the local firewall and network devices.
-Using the excellent Comcast (github.com/tylertreat/comcast) library, it can shape and interfere with network traffic,
+Using the excellent [Comcast](https://github.com/tylertreat/comcast) library, it can shape and interfere with network traffic,
 including bandwidth, latency, packet loss and jitter on specified ports, IPs and protocols.
 
 NOTE: This component only works on MacOSX, FreeBSD, Linux and common *nix flavours.
@@ -236,5 +241,5 @@ Take a look at the [HTTP Proxy](protocol/http.go) for a good working example.
 
 ### Middleware
 
-Proxies implement the [Proxy](/muxy/proxy.go) interface  and register themselves via `PluginFactories.register` to be available at runtime. 
+Middlewares implement the [Middleware](/muxy/middle.go) interface  and register themselves via `PluginFactories.register` to be available at runtime. 
 Take a look at the [HTTP Delay](symptom/http_delay.go) for a good working example.
