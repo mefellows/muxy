@@ -158,7 +158,7 @@ func (p *proxy) pipe(src io.Reader, dst io.Writer) {
 			if islocal {
 				middleware.HandleEvent(muxy.EVENT_PRE_DISPATCH, ctx)
 			} else {
-				middleware.HandleEvent(muxy.EVENT_PRE_RESPONSE, ctx)
+				middleware.HandleEvent(muxy.EVENT_POST_DISPATCH, ctx)
 			}
 		}
 

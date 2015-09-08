@@ -9,7 +9,6 @@ type ProxyEvent int
 const (
 	EVENT_PRE_DISPATCH ProxyEvent = iota
 	EVENT_POST_DISPATCH
-	EVENT_PRE_RESPONSE
 )
 
 type Middleware interface {
