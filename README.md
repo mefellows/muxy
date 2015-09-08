@@ -1,6 +1,6 @@
 # Muxy
 
-Simulating real-world distributed system failures to improve resilience in your applications.
+Proxy for simulating real-world distributed system failures to improve resilience in your applications.
 
 [![wercker status](https://app.wercker.com/status/e45703ebafd48632db56f022cc54546b/s "wercker status")](https://app.wercker.com/project/bykey/e45703ebafd48632db56f022cc54546b)
 
@@ -35,6 +35,7 @@ If you are building a distributed system, Muxy can help you test your resilience
 * Simulate real-world network connectivity problems/partitions for mobile devices, distributed systemss etc.
 * Ideal for use in CI/Test Suites to test resilience across languages/technologies
 * Simple native binary installation - no dependencies
+* Extensible and modular architecture
 
 ## Installation
 
