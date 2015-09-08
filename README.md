@@ -10,6 +10,27 @@ Muxy is a proxy that _mucks_ with your system and application context, operating
 
 If you are building a distributed system, Muxy can help you test your resilience and fault tolerance patterns.
 
+### Contents
+
+  * [Features](#features)
+  * [Installation](#installation)
+  * [Using Muxy](#using-muxy)
+    * 5 Minute [Quick Start](#5-minute-example)
+  * [Muxy Components](#proxies-and-middlewares)
+    * [Proxies](#proxies)
+      * [HTTP Proxy](#http-proxy)
+      * [TCP Proxy](#tcp-proxy)
+    * [Middleware](#middleware)
+      * [HTTP Delay](#http-delay)
+      * [HTTP Tamperer](#http-tamperer)
+      * [Network Shaper](#network-shaper)
+      * [Logger](#logger)
+  * [YAML Configuration](#configuration-reference) Reference
+  * [Extending Muxy](#extending-muxy)
+
+## Features
+
+
 ## Installation
 
 Download a [release](https://github.com/mefellows/muxy/releases) for your platform
@@ -68,11 +89,9 @@ Muxy is typically used in two ways:
 1. Run Muxy with your config: `muxy proxy --config ./config.yml`
 1. Make a request to www.onegeek.com via the proxy: `time curl -v -H"Host: www.onegeek.com.au" http://localhost:8181/`. Compare that with a request direct to the website: `time curl -v www.onegeek.com.au` - it should be approximately 5s faster.
 
-That's it!
+That's it - running Muxy is a matter of configuring one or more [Proxies](#proxies), with 1 or more [Middleware](#middleware) components defined in a simple [YAML file](/examples/config.yml).
 
 ### Muxy as part of a test suite
-
-T
 
 1. Create an application
 2. Build in fault tolerence (e.g. using something like [Hystrix](https://github.com/Netflix/Hystrix))
@@ -86,3 +105,136 @@ T
 
 Muxy is a stateful system, and mucks with your low-level (system) networking interfaces and therefore cannot be run in parallel with other tests.
 It is also recommended to run within a container/virtual machine to avoid unintended consequences (like breaking Internet access from the host).
+
+## Proxies and Middlewares
+
+### Proxies
+#### HTTP Proxy
+
+Simple HTTP Proxy that starts up on a local IP/Hostname and Port. 
+
+Example configuration snippet:
+
+```yaml
+proxy:
+  - name: http_proxy
+    config:
+      host: 0.0.0.0
+      port: 8181
+      proxy_host: 0.0.0.0
+      proxy_port: 8282
+```
+
+#### TCP Proxy
+
+Simple TCP Proxy that starts up on a local IP/Hostname and Port, forwarding traffic to the specified `proxy_host` on `proxy_port`. 
+
+Example configuration snippet:
+
+```yaml
+proxy:
+  - name: tcp_proxy
+    config:
+      host: 0.0.0.0           # Local ip/hostname to bind to and accept connections.
+      port: 8080              # Local port to bind to
+      proxy_host: 0.0.0.0
+      proxy_port: 2000
+      nagles_algorithm: true
+      packet_size: 64
+```
+
+### Middleware
+
+Middleware have the ability to intervene upon receiving a request (Pre-Dispatch) or before sending the response back to the client (Post-Dispatch). 
+In some cases, such as the Network Shaper, the effect is applied _before any request is made_ (e.g. if the local network device configuration is altered).
+
+#### HTTP Delay
+
+A basic middleware that simply adds a delay of `delay` seconds.
+
+Example configuration snippet:
+
+```yaml
+middleware:
+  - name: http_delay
+    config:
+      delay: 1                 # Delay in seconds to apply to response
+```
+
+#### HTTP Tamperer
+
+A Layer 7 tamperer, this plugin allows you to modify response headers, status code or the body itself.
+
+Example configuration snippet:
+
+```yaml
+middleware:
+  - name: http_tamperer
+    config:
+      status: 401              # Override HTTP Status code
+      headers:                 # Override response headers
+        content_length: "27"
+        x_foo_bar:      "baz"
+      body:      "my new body" # Override response body
+```
+
+#### Network Shaper
+
+The network shaper plugin is a Layer 4 tamperer, and requires *root access* to work, as it needs to configure the local firewall and network devices.
+Using the excellent Comcast (github.com/tylertreat/comcast) library, it can shape and interfere with network traffic,
+including bandwidth, latency, packet loss and jitter on specified ports, IPs and protocols.
+
+NOTE: This component only works on MacOSX, FreeBSD, Linux and common *nix flavours.
+
+Example configuration snippet:
+
+```yaml
+middleware:
+
+  - name: network_shape
+    config:
+      latency:     250         # Latency to add in ms
+      target_bw:   750         # Bandwidth in kbits/s
+      packet_loss: 0.5         # Packet loss, as a %
+      target_ips:              # Target ipv4 IP addresses
+        - 0.0.0.0
+      target_ips6:             # Target ipv6 IP addresses
+        - "::1/128"
+      target_ports:            # Target destination ports
+        - "80"
+      target_protos:           # Target protocols
+        - "tcp"
+        - "udp"
+        - "icmp"
+```
+#### Logger
+
+Log the in/out messages, optionally requesting the output to be hex encoded.
+
+Example configuration snippet:
+
+```yaml
+middleware:
+  - name: logger
+    config:
+      hex_output: false        # Display output as Hex instead of a string
+```
+
+## Configuration Reference
+
+Refer to the [example](/examples/config.yml) YAML file for a full reference.
+
+## Extending Muxy
+
+Muxy is built as a series of configurable plugins (using [Plugo](https://github.com/mefellows/plugo)) that must be specified in the configuration
+file to be activated. Start with a quick tour of Plugo before progressing.
+
+### Proxies
+
+Proxies must implement the [Proxy](/muxy/proxy.go) interface, and register themselves via `PluginFactories.register` to be available at runtime. 
+Take a look at the [HTTP Proxy](protocol/http.go) for a good working example.
+
+### Middleware
+
+Proxies implement the [Proxy](/muxy/proxy.go) interface  and register themselves via `PluginFactories.register` to be available at runtime. 
+Take a look at the [HTTP Delay](symptom/http_delay.go) for a good working example.

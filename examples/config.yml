@@ -79,7 +79,7 @@ middleware:
   ## Network Shaper - Layer 4 Tamperer.
   ##
   ## Uses Comcast (github.com/tylertreat/comcast) to shape and interfere with network traffic,
-  ## including bandwidth, latency, jitter on specified ports, IPs and protocols.
+  ## including bandwidth, latency, packet loss and jitter on specified ports, IPs and protocols.
   ##
   ## NOTE: This plugin requires root/sudo access to run
   ##
