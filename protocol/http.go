@@ -32,6 +32,8 @@ func (p *HttpProxy) Teardown() {
 }
 
 func (p *HttpProxy) Proxy() {
+	log.Info("HTTP proxy listening on %s", log.Colorize(log.BLUE, fmt.Sprintf("http://%s:%d", p.Host, p.Port)))
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		director := func(req *http.Request) {

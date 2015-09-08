@@ -52,6 +52,7 @@ func (p *TcpProxy) Proxy() {
 	check(err)
 
 	for {
+		log.Info("TCP proxy listening on %s", log.Colorize(log.BLUE, fmt.Sprintf("tcp://%s:%d", p.Host, p.Port)))
 		conn, err := listener.AcceptTCP()
 		if err != nil {
 			fmt.Printf("Failed to accept connection '%s'\n", err)
