@@ -1,46 +1,100 @@
+## Test configuration name. Used for reporting.
 name: Network and HTTP screwer.
+
+## Test Description. Used for reporting
 description: Slow network to mobile levels, and add 1s delay to all messages
-loglevel: 0 # Debug
+
+## Specify log output level
+##
+## Log Levels supported:
+## Trace (0), Debug (1), Info (2, Default), Warn (3), Error (4), Fatal (5)
+loglevel: 1
+
+## Configure a proxy that will handle your requests, and forward
+## to proxied host.
+##
+## Currently supports `tcp_proxy` and `http_proxy`.
 proxy:
-  # - name: tcp_proxy
-  #   config:
-  #     host: 0.0.0.0
-  #     port: 8181
-  #     proxy_host: 0.0.0.0
-  #     proxy_port: 2000
-  #     nagles_algorithm: true
-  #     packet_size: 64
+
+  ## Configures a TCP proxy
+  ##
+  ## NOTE: TLS is currently not supported
+  - name: tcp_proxy
+    config:
+      host: 0.0.0.0           # Local address to bind to and accept connections. May be an IP/hostname
+      port: 8080              # Local port to bind to
+      proxy_host: 0.0.0.0
+      proxy_port: 2000
+      nagles_algorithm: true
+      packet_size: 64
+
+  ## HTTP Proxy: Configures an HTTP Proxy
+  ##
+  ## NOTE: SSL is currently not supported
   - name: http_proxy
     config:
       host: 0.0.0.0
       port: 8181
       proxy_host: 0.0.0.0
       proxy_port: 8282
+
+## Middleware
+##
+## Middleware are plugins that are given the opportunity to intervene
+## before a request is dispatched to the proxied system (PRE_DISPATCH event)
+## and afterwards (POST_DISPATCH event). They are given a reference to
+## the current context (HTTP Context or []bytes) and can mutate them.
+##
+## Middleware are executed in the order specified in this config.
+##
 middleware:
+
+  ## HTTP Tamperer - Messes with Layer 7.
+  ##
+  ## Useful for messing with the HTTP protocol
+  ##
   - name: http_tamperer
     config:
-      status: 401
-      headers:
-        # content_length: "27"
-        x_foo_bar: "baz"
-      body: "This is a very long sentence that spans several lines in the YAML but which will be rendered as a string without carriage returns."
+      status: 401              # Override HTTP Status code
+      headers:                 # Override response headers
+        content_length: "27"
+        x_foo_bar:      "baz"
+      body:      "my new body" # Override response body
+
+  ## Request Logger - use this to see what's going in/out of the Proxy.
+  ##
+  ##
   - name: logger
     config:
-      hex_output: true
-  # - name: http_delay
-  #   config:
-  #     delay: 1
-  # - name: network_shape
-  #   config:
-  #     latency: 250
-  #     target_bw: 750
-  #     default_bw: 740 
-  #     target_ips: 
-  #       - 0.0.0.0
-  #     #target_ips6: 
-  #     target_ports: 
-  #       - "80"
-  #     target_protos: 
-  #       - "tcp"
-  #       - "udp"
-  #       - "icmp"
+      hex_output: false        # Display output as Hex instead of a string
+
+  ## HTTP Response delay
+  ##
+  ## Simple middleware that delays an HTTP response up to `delay` seconds
+  ##
+  - name: http_delay
+    config:
+      delay: 1                 # Delay in seconds to apply to response
+
+  ## Network Shaper - Layer 4 Tamperer.
+  ##
+  ## Uses Comcast (github.com/tylertreat/comcast) to shape and interfere with network traffic,
+  ## including bandwidth, latency, jitter on specified ports, IPs and protocols.
+  ##
+  ## NOTE: This plugin requires root/sudo access to run
+  ##
+  - name: network_shape
+    config:
+      latency:     250         # Latency to add in ms
+      target_bw:   750         # Bandwidth in kbits/s
+      packet_loss: 0.5         # Packet loss, as a %
+      target_ips:              # Target ipv4 IP addresses
+        - 0.0.0.0
+      target_ips6:             # Target ipv6 IP addresses
+        - "::1/128"
+      target_ports:            # Target destination ports
+        - "80"
+      target_protos:           # Target protocols
+        - "tcp"
+        - "udp"
+        - "icmp"
