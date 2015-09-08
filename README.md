@@ -15,7 +15,7 @@ If you are building a distributed system, Muxy can help you test your resilience
   * [Features](#features)
   * [Installation](#installation)
   * [Using Muxy](#using-muxy)
-    * 5 Minute [Quick Start](#5-minute-example)
+    * [5 Minute Quick Start](#5-minute-example)
   * [Muxy Components](#proxies-and-middlewares)
     * [Proxies](#proxies)
       * [HTTP Proxy](#http-proxy)
@@ -25,16 +25,16 @@ If you are building a distributed system, Muxy can help you test your resilience
       * [HTTP Tamperer](#http-tamperer)
       * [Network Shaper](#network-shaper)
       * [Logger](#logger)
-  * [YAML Configuration](#configuration-reference) Reference
+  * [YAML Configuration Reference](#configuration-reference)
   * [Extending Muxy](#extending-muxy)
 
 ## Features
 
 * Ability to tamper with network devices at the transport level (Layer 4) 
 * ...and HTTP requests/responses at the HTTP protocol level (Layer 7)
-* Simulate real-world network connectivity problems/partitions for mobile devices, distributed systemss etc.
+* Simulate real-world network connectivity problems/partitions for mobile devices, distributed systems etc.
 * Ideal for use in CI/Test Suites to test resilience across languages/technologies
-* Simple native binary installation - no dependencies
+* Simple native binary installation with no dependencies
 * Extensible and modular architecture
 
 ## Installation
