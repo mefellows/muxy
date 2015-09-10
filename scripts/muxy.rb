@@ -6,10 +6,10 @@ class Muxy < Formula
 
   if Hardware.is_64_bit?
     url "https://github.com/mefellows/muxy/releases/download/v#{version}/darwin_amd64.zip"
-    sha1 'a2e54979a03a0cc4b30527c6c7d61e97f23cbf11'
+    sha1 'f9003414fadb5fb483a299866018eb6b7772d329'
   else
     url "https://github.com/mefellows/muxy/releases/download/v#{version}/darwin_386.zip"
-    sha1 '9d942be55cf5af6c17cc68f9beee6a60538105f1'
+    sha1 'a6bfa0bf2d9b012503a375735987aeed9f12cb6c'
   end
 
   depends_on :arch => :intel
