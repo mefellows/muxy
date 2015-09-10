@@ -177,11 +177,37 @@ Example configuration snippet:
 middleware:
   - name: http_tamperer
     config:
-      status: 401              # Override HTTP Status code
-      headers:                 # Override response headers
-        content_length: "27"
-        x_foo_bar:      "baz"
-      body:      "my new body" # Override response body
+      request:
+        method:           "GET"  # Override request method
+        headers:
+          x_my_request:   "foo"  # Override request header
+          content_type: "application/x-www-form-urlencoded"
+          content_length: "5"
+        cookies:                 # Custom request cookies
+            - name: "fooreq"
+              value: "blahaoeuaoeu"
+              domain: "localhost"
+              path: "/foopath"
+              secure: true
+              rawexpires: "Sat, 12 Sep 2015 09:19:48 UTC"
+              maxage: 200
+              httponly: true
+        body: "wow, new body!"   # Override request body
+      response:
+        status: 201              # Override HTTP Status code
+        headers:                 # Override response headers
+          content_length: "27"
+          x_foo_bar:      "baz"
+        body:      "my new body" # Override response body
+        cookies:                 # Custom response cookies
+            - name: "foo"
+              value: "blahaoeuaoeu"
+              domain: "localhost"
+              path: "/foopath"
+              secure: true
+              rawexpires: "Sat, 12 Sep 2015 09:19:48 UTC"
+              maxage: 200
+              httponly: true
 ```
 
 #### Network Shaper
