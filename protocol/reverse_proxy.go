@@ -192,7 +192,7 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Fire Pre-dispatch middleware event
-	ctx := &muxy.Context{Request: req}
+	ctx := &muxy.Context{Request: outreq}
 	for _, middleware := range p.Middleware {
 		middleware.HandleEvent(muxy.EVENT_PRE_DISPATCH, ctx)
 	}
