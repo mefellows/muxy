@@ -1,6 +1,7 @@
 package command
 
 import (
+	pki "github.com/mefellows/pkigo/command"
 	"github.com/mitchellh/cli"
 	"os"
 )
@@ -26,6 +27,9 @@ func init() {
 			return &ProxyCommand{
 				Meta: meta,
 			}, nil
+		},
+		"pki": func() (cli.Command, error) {
+			return &pki.PkiCommand{}, nil
 		},
 	}
 }

@@ -126,9 +126,11 @@ proxy:
   - name: http_proxy
     config:
       host: 0.0.0.0
+      protocol: http
       port: 8181
       proxy_host: 0.0.0.0
       proxy_port: 8282
+      proxy_protocol: https
 ```
 
 #### TCP Proxy
