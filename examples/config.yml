@@ -23,10 +23,10 @@ proxy:
     config:
       host: 0.0.0.0           # Local address to bind to and accept connections. May be an IP/hostname
       port: 8080              # Local port to bind to
-      proxy_host: 0.0.0.0
-      proxy_port: 2000
-      nagles_algorithm: true
-      packet_size: 64
+      proxy_host: 0.0.0.0     # Proxy server port
+      proxy_port: 2000        # Proxied server port
+      nagles_algorithm: true  # Use Nagles algorithm?
+      packet_size: 64         # Size of each contiguous network packet to proxy
 
   ## HTTP Proxy: Configures an HTTP Proxy
   ##
@@ -35,8 +35,10 @@ proxy:
     config:
       host: 0.0.0.0
       port: 8181
+      protocol: http
       proxy_host: 0.0.0.0
       proxy_port: 8282
+      proxy_protocol: http
 
 ## Middleware
 ##

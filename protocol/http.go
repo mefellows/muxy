@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
+	"github.com/mefellows/pkigo/pki"
 	"github.com/mefellows/plugo/plugo"
 	"net/http"
+	"time"
 )
 
 type HttpProxy struct {
@@ -32,7 +34,12 @@ func (p *HttpProxy) Teardown() {
 }
 
 func (p *HttpProxy) Proxy() {
-	log.Info("HTTP proxy listening on %s", log.Colorize(log.BLUE, fmt.Sprintf("http://%s:%d", p.Host, p.Port)))
+	log.Info("HTTP proxy listening on %s", log.Colorize(log.BLUE, fmt.Sprintf("%s://%s:%d", p.Protocol, p.Host, p.Port)))
+	pkiMgr, err := pki.New()
+	checkHttpServerError(err)
+	config, err := pkiMgr.GetClientTLSConfig()
+	checkHttpServerError(err)
+	config.InsecureSkipVerify = false
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -42,10 +49,23 @@ func (p *HttpProxy) Proxy() {
 			req.URL.Host = fmt.Sprintf("%s:%d", p.ProxyHost, p.ProxyPort)
 		}
 		proxy := &ReverseProxy{Director: director, Middleware: p.middleware}
+		proxy.Transport = &http.Transport{
+			Proxy:               http.ProxyFromEnvironment,
+			TLSClientConfig:     config,
+			TLSHandshakeTimeout: 10 * time.Second,
+		}
 		proxy.ServeHTTP(w, r)
 	})
-	err := http.ListenAndServe(fmt.Sprintf("%s:%d", p.Host, p.Port), mux)
+	if p.Protocol == "https" {
+		checkHttpServerError(err)
+		checkHttpServerError(http.ListenAndServeTLS(fmt.Sprintf("%s:%d", p.Host, p.Port), pkiMgr.Config.ClientCertPath, pkiMgr.Config.ClientKeyPath, mux))
+	} else {
+		checkHttpServerError(http.ListenAndServe(fmt.Sprintf("%s:%d", p.Host, p.Port), mux))
+	}
+}
+
+func checkHttpServerError(err error) {
 	if err != nil {
-		log.Info("ListenAndServe error: ", err.Error())
+		log.Error("ListenAndServe error: ", err.Error())
 	}
 }
