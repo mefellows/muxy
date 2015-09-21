@@ -116,12 +116,13 @@ middleware:
       latency:     250         # Latency to add in ms
       target_bw:   750         # Bandwidth in kbits/s
       packet_loss: 0.5         # Packet loss, as a %
-      target_ips:              # Target ipv4 IP addresses
-        - 0.0.0.0
+      target_ips:              # Target ipv4 IP addresses/CIDRs
+        - "0.0.0.0/0"
       target_ips6:             # Target ipv6 IP addresses
         - "::1/128"
       target_ports:            # Target destination ports
         - "80"
+        - "1:65635"            # Ranges also valid
       target_protos:           # Target protocols
         - "tcp"
         - "udp"
