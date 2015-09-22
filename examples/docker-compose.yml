@@ -1,0 +1,37 @@
+# Front end application
+api:
+  build: api
+  ports:
+   - "8000:80"
+  expose:
+  - "80"
+  links:
+  - backend:muxy
+
+# Back-end service
+backend:
+  build: backend
+  ports:
+   - "8001:80"
+  expose:
+  - "80"
+
+# Muxy resilience testing
+muxy:
+  build: .
+  ports:
+  - "8002:80"
+  expose:
+  - "80"
+  privileged: true
+  volumes:
+  - "./muxy/conf/:/opt/muxy/conf"
+  links:
+  - backend:backend
+
+# This guy runs our Unit tests!
+test:
+  build: muxy
+  command: go test -v ./...
+  links:
+    - api:api
