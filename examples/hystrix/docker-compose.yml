@@ -6,7 +6,7 @@ api:
   expose:
   - "80"
   links:
-  - backend:muxy
+  - muxy:backend
 
 # Back-end service
 backend:

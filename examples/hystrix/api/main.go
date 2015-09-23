@@ -7,19 +7,22 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
-	// "github.com/zenazn/goji/web/middleware"
 )
 
 func ping(c web.C, w http.ResponseWriter, r *http.Request) {
-	// hystrix.ConfigureCommand("call_backend", hystrix.CommandConfig{
-	// 	Timeout: 500,
-	// })
+	hystrix.ConfigureCommand("call_backend", hystrix.CommandConfig{
+		Timeout: 1500,
+   	MaxConcurrentRequests: 100,
+    ErrorPercentThreshold: 25,
+	})
 
-	hystrix.Go("call_backend", func() error {
+	hystrix.Do("call_backend", func() error {
 		res, err := http.Get("http://backend/")
-		if err != nil {
+		if err == nil && res != nil {
 			fmt.Fprintln(w, "Response from backend: \n")
+			fmt.Println("Response from backend: ")
 			res.Write(w)
+			return nil
 		}
 		return err
 	}, func(err error) error {
@@ -31,6 +34,5 @@ func ping(c web.C, w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	goji.Get("/*", ping)
-	// goji.Abandon(middleware.Logger)
 	goji.Serve()
 }

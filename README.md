@@ -26,11 +26,13 @@ If you are building a distributed system, Muxy can help you test your resilience
       * [Network Shaper](#network-shaper)
       * [Logger](#logger)
   * [YAML Configuration Reference](#configuration-reference)
+  * [Examples](#examples)
+    * [Go Hystrix](#hystrix)
   * [Extending Muxy](#extending-muxy)
 
 ## Features
 
-* Ability to tamper with network devices at the transport level (Layer 4) 
+* Ability to tamper with network devices at the transport level (Layer 4)
 * ...and HTTP requests/responses at the HTTP protocol level (Layer 7)
 * Simulate real-world network connectivity problems/partitions for mobile devices, distributed systems etc.
 * Ideal for use in CI/Test Suites to test resilience across languages/technologies
@@ -117,7 +119,7 @@ It is also recommended to run within a container/virtual machine to avoid uninte
 ### Proxies
 #### HTTP Proxy
 
-Simple HTTP Proxy that starts up on a local IP/Hostname and Port. 
+Simple HTTP Proxy that starts up on a local IP/Hostname and Port.
 
 Example configuration snippet:
 
@@ -135,7 +137,7 @@ proxy:
 
 #### TCP Proxy
 
-Simple TCP Proxy that starts up on a local IP/Hostname and Port, forwarding traffic to the specified `proxy_host` on `proxy_port`. 
+Simple TCP Proxy that starts up on a local IP/Hostname and Port, forwarding traffic to the specified `proxy_host` on `proxy_port`.
 
 Example configuration snippet:
 
@@ -153,7 +155,7 @@ proxy:
 
 ### Middleware
 
-Middleware have the ability to intervene upon receiving a request (Pre-Dispatch) or before sending the response back to the client (Post-Dispatch). 
+Middleware have the ability to intervene upon receiving a request (Pre-Dispatch) or before sending the response back to the client (Post-Dispatch).
 In some cases, such as the Network Shaper, the effect is applied _before any request is made_ (e.g. if the local network device configuration is altered).
 
 #### HTTP Delay
@@ -258,6 +260,13 @@ middleware:
 
 Refer to the [example](/examples/config.yml) YAML file for a full reference.
 
+## Examples
+
+### Hystrix
+
+Using the [Hystrix Go](https://github.com/afex/hystrix-go) library, we use Muxy to trigger a circuit breaker and return a
+canned response, ensuring we don't have downtime. View the [example](examples/hystrix).
+
 ## Extending Muxy
 
 Muxy is built as a series of configurable plugins (using [Plugo](https://github.com/mefellows/plugo)) that must be specified in the configuration
@@ -265,10 +274,10 @@ file to be activated. Start with a quick tour of Plugo before progressing.
 
 ### Proxies
 
-Proxies must implement the [Proxy](/muxy/proxy.go) interface, and register themselves via `PluginFactories.register` to be available at runtime. 
+Proxies must implement the [Proxy](/muxy/proxy.go) interface, and register themselves via `PluginFactories.register` to be available at runtime.
 Take a look at the [HTTP Proxy](protocol/http.go) for a good working example.
 
 ### Middleware
 
-Middlewares implement the [Middleware](/muxy/middle.go) interface  and register themselves via `PluginFactories.register` to be available at runtime. 
+Middlewares implement the [Middleware](/muxy/middle.go) interface  and register themselves via `PluginFactories.register` to be available at runtime.
 Take a look at the [HTTP Delay](symptom/http_delay.go) for a good working example.
