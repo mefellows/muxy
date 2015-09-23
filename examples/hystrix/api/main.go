@@ -10,13 +10,7 @@ import (
 )
 
 func ping(c web.C, w http.ResponseWriter, r *http.Request) {
-	hystrix.ConfigureCommand("call_backend", hystrix.CommandConfig{
-		Timeout: 1500,
-   	MaxConcurrentRequests: 100,
-    ErrorPercentThreshold: 25,
-	})
-
-	hystrix.Do("call_backend", func() error {
+	hystrix.Go("call_backend", func() error {
 		res, err := http.Get("http://backend/")
 		if err == nil && res != nil {
 			fmt.Fprintln(w, "Response from backend: \n")
@@ -33,6 +27,12 @@ func ping(c web.C, w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	hystrix.ConfigureCommand("call_backend", hystrix.CommandConfig{
+		Timeout:               1500,
+		MaxConcurrentRequests: 100,
+		ErrorPercentThreshold: 25,
+	})
+
 	goji.Get("/*", ping)
 	goji.Serve()
 }
