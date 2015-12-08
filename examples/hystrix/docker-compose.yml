@@ -7,6 +7,7 @@ api:
   - "80"
   links:
   - muxy:backend
+  - statsd:statsd
 
 # Back-end service
 backend:
@@ -15,6 +16,8 @@ backend:
    - "8001:80"
   expose:
   - "80"
+  links:
+  - statsd:statsd
 
 # Muxy resilience testing
 muxy:
@@ -35,3 +38,18 @@ test:
   command: go test -v ./...
   links:
     - api:api
+
+statsd:
+  build: sgg
+  ports:
+  - "8025:80"
+  - "2003:2003/tcp"
+  - "8125:8125/udp"
+  - "8126:8126"
+  - "9200:9200"
+  - "9300:9300"
+  - "8081:81"
+  volumes:
+  - "./sgg/data/whisper:/opt/graphite/storage/whisper"
+  - "./sgg/data/elasticsearch:/var/lib/elasticsearch"
+  - "./sgg/data/sqllite:/opt/grafana/data"
