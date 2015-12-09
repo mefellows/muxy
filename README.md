@@ -46,7 +46,7 @@ and put it somewhere on the `PATH`.
 
 ### On Mac OSX using Homebrew
 
-If you are using [Homebrew](http://brew.sh) you can follow these steps to install Muck:
+If you are using [Homebrew](http://brew.sh) you can follow these steps to install Muxy:
 
 ```bash
 brew install https://raw.githubusercontent.com/mefellows/muxy/master/scripts/muxy.rb
