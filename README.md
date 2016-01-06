@@ -28,6 +28,7 @@ If you are building a distributed system, Muxy can help you test your resilience
   * [YAML Configuration Reference](#configuration-reference)
   * [Examples](#examples)
     * [Go Hystrix](#hystrix)
+  * [Using Docker][#docker]
   * [Extending Muxy](#extending-muxy)
 
 ## Features
@@ -38,6 +39,7 @@ If you are building a distributed system, Muxy can help you test your resilience
 * Ideal for use in CI/Test Suites to test resilience across languages/technologies
 * Simple native binary installation with no dependencies
 * Extensible and modular architecture
+* An official Docker [container][https://github.com/mefellows/docker-muxy] to simplify uses cases such as Docker Compose
 
 ## Installation
 
@@ -266,6 +268,29 @@ Refer to the [example](/examples/config.yml) YAML file for a full reference.
 
 Using the [Hystrix Go](https://github.com/afex/hystrix-go) library, we use Muxy to trigger a circuit breaker and return a
 canned response, ensuring we don't have downtime. View the [example](examples/hystrix).
+
+## Docker
+
+Download the [Docker image](https://github.com/mefellows/docker-muxy) by running:
+
+```
+docker pull mefellows/muxy
+```
+
+After creating a [config](#configuration-reference] file (let's assume it's at `./conf/config.yml`), and assuming you are proxying something on port `80`, you can now run the image locally:
+
+```
+docker run \
+  -d \
+  -p 80:80 \
+  -v "$PWD/conf":/opt/muxy/conf \
+  --privileged \
+  mefellows/muxy
+```
+
+You should now be able to hit this Docker container and simulate any failures as per usual. e.g. `curl docker:80/some/endpoint`.
+
+The [Hystrix](#hystrix) example above has a detailed example on how to use Muxy with a more complicated system, using Docker Compose to orchestrate a number of containers.
 
 ## Extending Muxy
 
