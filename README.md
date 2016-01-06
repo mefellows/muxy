@@ -28,7 +28,7 @@ If you are building a distributed system, Muxy can help you test your resilience
   * [YAML Configuration Reference](#configuration-reference)
   * [Examples](#examples)
     * [Go Hystrix](#hystrix)
-  * [Using Docker][#docker]
+  * [Using Docker](#docker)
   * [Extending Muxy](#extending-muxy)
 
 ## Features
