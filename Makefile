@@ -8,6 +8,9 @@ bin:
 dev:
 	@TF_DEV=1 sh -c "$(CURDIR)/scripts/build.sh"
 
+package:
+	@TF_DEV=1 sh -c "$(CURDIR)/scripts/package.sh"
+
 test:
 	"$(CURDIR)/scripts/test.sh"
 

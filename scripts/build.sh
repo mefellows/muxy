@@ -17,7 +17,6 @@ cd $DIR
 
 # Get the git commit
 GIT_COMMIT=$(git rev-parse HEAD)
-# GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 
 # If its dev mode, only build for ourself
 if [ "${TF_DEV}x" != "x" ]; then
@@ -46,7 +45,7 @@ gox \
     -os="${XC_OS}" \
     -arch="${XC_ARCH}" \
     -output "pkg/{{.OS}}_{{.Arch}}/{{.Dir}}" \
-    ./...
+    .
 set -e
 
 # Move all the compiled things to the $GOPATH/bin

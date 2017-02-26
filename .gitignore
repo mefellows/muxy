@@ -25,3 +25,4 @@ _testmain.go
 *.test
 *.prof
 *.cov
+dist
