@@ -15,7 +15,7 @@ done
 
 # Generate shasum
 pushd ${OUTPUT}
-shasum * > ./SHASUMS
+shasum -a 256 * > ./SHASUMS
 popd
 
 ls -l ${OUTPUT}
