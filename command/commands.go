@@ -1,17 +1,21 @@
 package command
 
 import (
+	"os"
+
 	pki "github.com/mefellows/pkigo/command"
 	"github.com/mitchellh/cli"
-	"os"
 )
 
+// Commands contains all CLI commands available
 var Commands map[string]cli.CommandFactory
-var Ui cli.Ui
+
+// UI wraps the commands available to the CLI
+var UI cli.Ui
 
 func init() {
 
-	Ui = &cli.ColoredUi{
+	UI = &cli.ColoredUi{
 		Ui:          &cli.BasicUi{Writer: os.Stdout, Reader: os.Stdin, ErrorWriter: os.Stderr},
 		OutputColor: cli.UiColorNone,
 		InfoColor:   cli.UiColorNone,
@@ -19,7 +23,7 @@ func init() {
 	}
 
 	meta := Meta{
-		Ui: Ui,
+		UI: UI,
 	}
 
 	Commands = map[string]cli.CommandFactory{

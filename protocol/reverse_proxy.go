@@ -1,14 +1,12 @@
-// Modified version of the original golang HTTP reverse proxy handler
+// Package protocol is a modified version of the original golang HTTP reverse proxy handler
 // Added support for Filter functions
-
+//
 // Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 package protocol
 
 import (
-	"github.com/mefellows/muxy/log"
-	"github.com/mefellows/muxy/muxy"
 	"io"
 	"net"
 	"net/http"
@@ -16,6 +14,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/mefellows/muxy/log"
+	"github.com/mefellows/muxy/muxy"
 )
 
 // FilterFunc is a function that is called to process a proxy response
@@ -205,7 +206,7 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	defer res.Body.Close()
 
 	// Fire Post-dispatch middleware event
-	ctx = &muxy.Context{req, res, rw, nil}
+	ctx = &muxy.Context{req, res, rw, nil} // nolint
 	for _, middleware := range p.Middleware {
 		middleware.HandleEvent(muxy.EVENT_POST_DISPATCH, ctx)
 	}

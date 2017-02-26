@@ -13,7 +13,7 @@ func ping(c web.C, w http.ResponseWriter, r *http.Request) {
 	hystrix.Go("call_backend", func() error {
 		res, err := http.Get("http://backend/")
 		if err == nil && res != nil {
-			fmt.Fprintln(w, "Response from backend: \n")
+			fmt.Fprint(w, "Response from backend:\n\n")
 			fmt.Println("Response from backend: ")
 			res.Write(w)
 			return nil

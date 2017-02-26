@@ -1,16 +1,20 @@
 package muxy
 
 import (
-	"github.com/mefellows/muxy/log"
-	"github.com/mefellows/plugo/plugo"
 	"os"
 	"os/signal"
+
+	"github.com/mefellows/muxy/log"
+	"github.com/mefellows/plugo/plugo"
 )
 
+// MuxyConfig is the top-level configuration struct
 type MuxyConfig struct {
 	RawConfig  *plugo.RawConfig
 	ConfigFile string // Path to YAML Configuration File
 }
+
+// PluginConfig contains configuration for all plugins to Muxy
 type PluginConfig struct {
 	Name        string
 	Description string
@@ -19,21 +23,25 @@ type PluginConfig struct {
 	Middleware  []plugo.PluginConfig
 }
 
+// Muxy is the main orchestration component
 type Muxy struct {
 	config      *MuxyConfig
 	middlewares []Middleware
 	proxies     []Proxy
 }
 
+// New creates a new Muxy instance
 func New(config *MuxyConfig) *Muxy {
 	return &Muxy{config: config}
 }
 
+// NewWithDefaultMuxyConfig creates a new Muxy instance with defaults
 func NewWithDefaultMuxyConfig() *Muxy {
 	c := &MuxyConfig{}
 	return &Muxy{config: c}
 }
 
+// Run the mucking proxy!
 func (m *Muxy) Run() {
 	m.LoadPlugins()
 
@@ -60,6 +68,7 @@ func (m *Muxy) Run() {
 	}
 }
 
+// LoadPlugins loads all plugins dynamically and configures them
 func (m *Muxy) LoadPlugins() {
 	// Load Configuration
 	var err error
@@ -75,7 +84,7 @@ func (m *Muxy) LoadPlugins() {
 		log.Fatal("No config file provided")
 	}
 
-	log.SetLevel(log.LogLevel(c.LogLevel))
+	log.SetLevel(log.Level(c.LogLevel))
 
 	// Load all plugins
 	m.middlewares = make([]Middleware, len(c.Middleware))

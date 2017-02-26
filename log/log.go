@@ -2,16 +2,22 @@ package log
 
 import (
 	"fmt"
-	"github.com/mgutz/ansi"
 	"log"
 	"os"
+
+	"github.com/mgutz/ansi"
 )
 
-type LogLevel int
+// Level to set
+// nolint
+type Level int
+
+// Colour type to print in log messages
 type Colour int
 
+// nolint
 const (
-	TRACE LogLevel = iota
+	TRACE Level = iota
 	DEBUG
 	INFO
 	WARN
@@ -19,6 +25,7 @@ const (
 	FATAL
 )
 
+// nolint
 const (
 	BLACK Colour = iota
 	BLUE
@@ -62,7 +69,7 @@ var coloursMap = map[Colour]string{
 // Logging facility
 type MuxyLogger struct {
 	log.Logger
-	Level LogLevel
+	Level Level
 }
 
 func init() {
@@ -109,7 +116,7 @@ func (m *MuxyLogger) Fatalf(format string, v ...interface{}) {
 	os.Exit(1)
 }
 
-func (m *MuxyLogger) Log(l LogLevel, format string, v ...interface{}) {
+func (m *MuxyLogger) Log(l Level, format string, v ...interface{}) {
 	if l >= m.Level {
 		var level string
 		var colorFormat = ""
@@ -133,7 +140,7 @@ func (m *MuxyLogger) Log(l LogLevel, format string, v ...interface{}) {
 	}
 }
 
-func (m *MuxyLogger) SetLevel(l LogLevel) {
+func (m *MuxyLogger) SetLevel(l Level) {
 	m.Level = l
 }
 
@@ -169,10 +176,10 @@ func Fatalf(format string, v ...interface{}) {
 	std.Fatalf(format, v...)
 }
 
-func Log(l LogLevel, format string, v ...interface{}) {
+func Log(l Level, format string, v ...interface{}) {
 	std.Log(l, format, v...)
 }
 
-func SetLevel(l LogLevel) {
+func SetLevel(l Level) {
 	std.SetLevel(l)
 }

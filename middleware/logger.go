@@ -2,18 +2,19 @@ package middleware
 
 import (
 	"fmt"
+
 	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 	"github.com/mefellows/plugo/plugo"
-	"time"
 )
 
+// LoggerMiddleware is middleware that will log all request/responses at
+// a configured level
 type LoggerMiddleware struct {
 	HexOutput bool `mapstructure:"hex_output"`
 	format    string
 }
 
-const DEFAULT_DELAY = 2 * time.Second
 const bytesTab = "\n\t\t\t\t\t\t"
 
 func init() {
@@ -22,6 +23,7 @@ func init() {
 	}, "logger")
 }
 
+// Setup sets up the middleware
 func (l *LoggerMiddleware) Setup() {
 	if l.HexOutput {
 		l.format = "%x"
@@ -30,9 +32,11 @@ func (l *LoggerMiddleware) Setup() {
 	}
 }
 
+// Teardown shuts down the middleware
 func (LoggerMiddleware) Teardown() {
 }
 
+// HandleEvent takes a ProxyEvent and acts on the information provided
 func (l *LoggerMiddleware) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
 	case muxy.EVENT_PRE_DISPATCH:

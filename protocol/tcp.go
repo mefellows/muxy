@@ -2,13 +2,16 @@ package protocol
 
 import (
 	"fmt"
+	"io"
+	"net"
+
 	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 	"github.com/mefellows/plugo/plugo"
-	"io"
-	"net"
 )
 
+// TcpProxy implements a TCP proxy
+// nolint
 type TcpProxy struct {
 	Port            int    `required:"true"`
 	Host            string `required:"true" default:"localhost"`
@@ -17,8 +20,7 @@ type TcpProxy struct {
 	NaglesAlgorithm bool   `mapstructure:"nagles_algorithm"`
 	HexOutput       bool   `mapstructure:"hex_output"`
 	PacketSize      int    `mapstructure:"packet_size" default:"64" required:"true"`
-	matchId         uint64
-	connId          uint64
+	connID          uint64
 	middleware      []muxy.Middleware
 }
 
@@ -34,13 +36,16 @@ func check(err error) {
 	}
 }
 
+// Setup sets up the TCP proxy
 func (p *TcpProxy) Setup(middleware []muxy.Middleware) {
 	p.middleware = middleware
 }
 
+// Teardown shuts down the TCP proxy
 func (p *TcpProxy) Teardown() {
 }
 
+// Proxy runs the TCP proxy
 func (p *TcpProxy) Proxy() {
 	log.Trace("Checking connection: %s:%d", p.Host, p.Port)
 	laddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", p.Host, p.Port))
@@ -58,7 +63,7 @@ func (p *TcpProxy) Proxy() {
 			fmt.Printf("Failed to accept connection '%s'\n", err)
 			continue
 		}
-		p.connId++
+		p.connID++
 
 		p := &proxy{
 			lconn:      conn,
@@ -67,12 +72,10 @@ func (p *TcpProxy) Proxy() {
 			packetsize: p.PacketSize,
 			erred:      false,
 			errsig:     make(chan bool),
-			prefix:     fmt.Sprintf("Connection #%03d ", p.connId),
+			prefix:     fmt.Sprintf("Connection #%03d ", p.connID),
 			hex:        p.HexOutput,
 			nagles:     p.NaglesAlgorithm,
 			middleware: p.middleware,
-			//	matcher:  matcher,
-			//	replacer: replacer,
 		}
 		go p.start()
 	}
@@ -176,52 +179,3 @@ func (p *proxy) pipe(src io.Reader, dst io.Writer) {
 		}
 	}
 }
-
-//helper functions
-
-/*
-func createMatcher(match string) func([]byte) {
-	if match == "" {
-		return nil
-	}
-	re, err := regexp.Compile(match)
-	if err != nil {
-		warn("Invalid match regex: %s", err)
-		return nil
-	}
-
-	log("Matching %s", re.String())
-	return func(input []byte) {
-		ms := re.FindAll(input, -1)
-		for _, m := range ms {
-			matchid++
-			log("Match #%d: %s", matchid, string(m))
-		}
-	}
-}
-
-func createReplacer(replace string) func([]byte) []byte {
-	if replace == "" {
-		return nil
-	}
-	//split by / (TODO: allow slash escapes)
-	parts := strings.Split(replace, "~")
-	if len(parts) != 2 {
-		fmt.Println(c("Invalid replace option", "red"))
-		return nil
-	}
-
-	re, err := regexp.Compile(string(parts[0]))
-	if err != nil {
-		log.Warn("Invalid replace regex: %s", err)
-		return nil
-	}
-
-	repl := []byte(parts[1])
-
-	log("Replacing %s with %s", re.String(), repl)
-	return func(input []byte) []byte {
-		return re.ReplaceAll(input, repl)
-	}
-}
-*/
