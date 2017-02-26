@@ -29,11 +29,12 @@ build:
         code: |
           if [ -d "$WERCKER_CACHE_DIR/dist" ]; then rm -rf $WERCKER_CACHE_DIR/dist; fi
           cp -r dist $WERCKER_CACHE_DIR/dist
+          ls -larth $WERCKER_CACHE_DIR/dist
 deploy:
   steps:
     - tcnksm/ghr:
         token: $GITHUB_TOKEN
         version: $RELEASE_VERSION
-        input: dist
+        input: $WERCKER_CACHE_DIR/dist
         replace: $RELEASE_IS_DRAFT
         pre-release: $RELEASE_IS_DRAFT
