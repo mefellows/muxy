@@ -66,7 +66,7 @@ var coloursMap = map[Colour]string{
 	LIGHTWHITE:   ansi.ColorCode("white+h"),
 }
 
-// Logging facility
+// MuxyLogger is the logging facility for Muxy
 type MuxyLogger struct {
 	log.Logger
 	Level Level
@@ -78,44 +78,53 @@ func init() {
 	}
 }
 
+// NewLogger creates a new logger
 func NewLogger() *MuxyLogger {
 	return &MuxyLogger{Level: INFO}
 }
 
 var std = NewLogger()
 
+// Trace Logging
 func (m *MuxyLogger) Trace(format string, v ...interface{}) {
 	m.Log(TRACE, format, v...)
 }
 
+// Debug logging
 func (m *MuxyLogger) Debug(format string, v ...interface{}) {
 	m.Log(DEBUG, format, v...)
 }
 
+// Info loggig
 func (m *MuxyLogger) Info(format string, v ...interface{}) {
 	m.Log(INFO, format, v...)
 }
 
+// Warn logging
 func (m *MuxyLogger) Warn(format string, v ...interface{}) {
 	m.Log(WARN, format, v...)
 }
 
+// Error logging
 func (m *MuxyLogger) Error(format string, v ...interface{}) {
 	m.Log(ERROR, format, v...)
 }
 
+// Fatal logging
 func (m *MuxyLogger) Fatal(v ...interface{}) {
 	s := fmt.Sprint(v...)
 	m.Log(FATAL, s)
 	os.Exit(1)
 }
 
+// Fatalf formatted fatal logging
 func (m *MuxyLogger) Fatalf(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
 	m.Log(FATAL, s)
 	os.Exit(1)
 }
 
+// Log is general log facility
 func (m *MuxyLogger) Log(l Level, format string, v ...interface{}) {
 	if l >= m.Level {
 		var level string
@@ -140,46 +149,57 @@ func (m *MuxyLogger) Log(l Level, format string, v ...interface{}) {
 	}
 }
 
+// SetLevel sets the log level
 func (m *MuxyLogger) SetLevel(l Level) {
 	m.Level = l
 }
 
+// Colorize returns a coloured log string
 func Colorize(colour Colour, format string) string {
 	return fmt.Sprintf("%s%s%s", coloursMap[colour], format, ansi.Reset)
 }
 
+// Trace logging
 func Trace(format string, v ...interface{}) {
 	std.Log(TRACE, format, v...)
 }
 
+// Debug logging
 func Debug(format string, v ...interface{}) {
 	std.Log(DEBUG, format, v...)
 }
 
+// Info logging
 func Info(format string, v ...interface{}) {
 	std.Log(INFO, format, v...)
 }
 
+// Warn logging
 func Warn(format string, v ...interface{}) {
 	std.Log(WARN, format, v...)
 }
 
+// Error logging
 func Error(format string, v ...interface{}) {
 	std.Log(ERROR, format, v...)
 }
 
+// Fatal logging
 func Fatal(v ...interface{}) {
 	std.Fatal(v...)
 }
 
+// Fatalf is formatted fatal logging
 func Fatalf(format string, v ...interface{}) {
 	std.Fatalf(format, v...)
 }
 
+// Log general log method
 func Log(l Level, format string, v ...interface{}) {
 	std.Log(l, format, v...)
 }
 
+// SetLevel sets log level
 func SetLevel(l Level) {
 	std.SetLevel(l)
 }
