@@ -16,14 +16,19 @@ build:
         name: Publish Coveralls
         code: goveralls -service="wercker.com" -coverprofile=profile.cov -repotoken $COVERALLS_TOKEN
     - script:
+        name: build
+        code: |
+          make bin
+    - script:
         name: package
         code: |
           apt-get update && apt-get install -y zip
           make package
     - script:
-        name: build
+        name: publish artifacts
         code: |
-          make bin
+          if [ -d "$WERCKER_CACHE_DIR/dist" ]; then rm -rf $WERCKER_CACHE_DIR/dist; fi
+          cp -r dist $WERCKER_CACHE_DIR/dist
 deploy:
   steps:
     - tcnksm/ghr:
