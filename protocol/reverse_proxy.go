@@ -195,7 +195,7 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	// Fire Pre-dispatch middleware event
 	ctx := &muxy.Context{Request: outreq}
 	for _, middleware := range p.Middleware {
-		middleware.HandleEvent(muxy.EVENT_PRE_DISPATCH, ctx)
+		middleware.HandleEvent(muxy.EventPreDispatch, ctx)
 	}
 	res, err := transport.RoundTrip(outreq)
 	if err != nil {
@@ -208,7 +208,7 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	// Fire Post-dispatch middleware event
 	ctx = &muxy.Context{req, res, rw, nil} // nolint
 	for _, middleware := range p.Middleware {
-		middleware.HandleEvent(muxy.EVENT_POST_DISPATCH, ctx)
+		middleware.HandleEvent(muxy.EventPostDispatch, ctx)
 	}
 
 	copyHeader(rw.Header(), res.Header)

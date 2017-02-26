@@ -68,7 +68,7 @@ func (s *ShittyNetworkSymptom) Setup() {
 // HandleEvent is the hook into the event system
 func (s ShittyNetworkSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
-	case muxy.EVENT_PRE_DISPATCH:
+	case muxy.EventPreDispatch:
 		s.Muck(ctx)
 	}
 }

@@ -1,16 +1,20 @@
 package muxy
 
-// Middleware's are executed in stacked order before or after a Middleware,
-// and are perfect for jobs like instrumentation. They are given a read/write copy
-// of the runtime context and are executed synchronously.
-
+// ProxyEvent is the event set to a proxy
 type ProxyEvent int
 
 const (
-	EVENT_PRE_DISPATCH ProxyEvent = iota
-	EVENT_POST_DISPATCH
+	// EventPreDispatch is the event sent prior to dispatching a request
+	EventPreDispatch ProxyEvent = iota
+
+	// EventPostDispatch is the event sent directly after dispatching a request
+	EventPostDispatch
 )
 
+// Middleware is a plugin that intercepts requests and injects chaos
+// Middleware's are executed in stacked order before or after a Middleware,
+// and are perfect for jobs like instrumentation. They are given a read/write copy
+// of the runtime context and are executed synchronously.
 type Middleware interface {
 	Setup()
 	HandleEvent(event ProxyEvent, ctx *Context)

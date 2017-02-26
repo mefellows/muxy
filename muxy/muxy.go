@@ -8,8 +8,8 @@ import (
 	"github.com/mefellows/plugo/plugo"
 )
 
-// MuxyConfig is the top-level configuration struct
-type MuxyConfig struct {
+// Config is the top-level configuration struct
+type Config struct {
 	RawConfig  *plugo.RawConfig
 	ConfigFile string // Path to YAML Configuration File
 }
@@ -25,19 +25,19 @@ type PluginConfig struct {
 
 // Muxy is the main orchestration component
 type Muxy struct {
-	config      *MuxyConfig
+	config      *Config
 	middlewares []Middleware
 	proxies     []Proxy
 }
 
 // New creates a new Muxy instance
-func New(config *MuxyConfig) *Muxy {
+func New(config *Config) *Muxy {
 	return &Muxy{config: config}
 }
 
-// NewWithDefaultMuxyConfig creates a new Muxy instance with defaults
-func NewWithDefaultMuxyConfig() *Muxy {
-	c := &MuxyConfig{}
+// NewWithDefaultConfig creates a new Muxy instance with defaults
+func NewWithDefaultConfig() *Muxy {
+	c := &Config{}
 	return &Muxy{config: c}
 }
 

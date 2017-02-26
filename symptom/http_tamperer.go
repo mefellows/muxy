@@ -79,9 +79,9 @@ func (r *responseBody) Read(p []byte) (int, error) {
 // event
 func (m *HttpTampererSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
-	case muxy.EVENT_PRE_DISPATCH:
+	case muxy.EventPreDispatch:
 		m.MuckRequest(ctx)
-	case muxy.EVENT_POST_DISPATCH:
+	case muxy.EventPostDispatch:
 		m.MuckResponse(ctx)
 	}
 }

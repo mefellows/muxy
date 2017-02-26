@@ -33,7 +33,7 @@ func (m HttpDelaySymptom) Teardown() {
 // HandleEvent takes a proxy event for the proxy to intercept and modify
 func (m HttpDelaySymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
-	case muxy.EVENT_PRE_DISPATCH:
+	case muxy.EventPreDispatch:
 		m.Muck(ctx)
 	}
 }

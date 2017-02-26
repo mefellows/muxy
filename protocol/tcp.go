@@ -159,9 +159,9 @@ func (p *proxy) pipe(src io.Reader, dst io.Writer) {
 		ctx := &muxy.Context{Bytes: b}
 		for _, middleware := range p.middleware {
 			if islocal {
-				middleware.HandleEvent(muxy.EVENT_PRE_DISPATCH, ctx)
+				middleware.HandleEvent(muxy.EventPreDispatch, ctx)
 			} else {
-				middleware.HandleEvent(muxy.EVENT_POST_DISPATCH, ctx)
+				middleware.HandleEvent(muxy.EventPostDispatch, ctx)
 			}
 		}
 
