@@ -16,9 +16,9 @@ build:
         name: Publish Coveralls
         code: goveralls -service="wercker.com" -coverprofile=profile.cov -repotoken $COVERALLS_TOKEN
     - script:
-        name: gox build
+        name: build
         code: |
-            XC_OS="linux darwin freebsd" XC_ARCH="386 amd64" make bin
+          make bin
     - tcnksm/zip:
         input: pkg
         output: $WERCKER_OUTPUT_DIR/dist

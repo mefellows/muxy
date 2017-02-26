@@ -3,6 +3,10 @@
 # This script builds the application from source for multiple platforms.
 set -e
 
+# Build deps
+go get -u github.com/mitchellh/gox
+go get -u golang.org/x/tools/cmd/stringer
+
 # Get the parent directory of where this script is.
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
@@ -22,8 +26,8 @@ if [ "${TF_DEV}x" != "x" ]; then
 fi
 
 # Determine the arch/os combos we're building for
-XC_ARCH=${XC_ARCH:-"386 amd64 arm"}
-XC_OS=${XC_OS:-linux darwin freebsd openbsd}
+XC_ARCH=${XC_ARCH:-"386 amd64"}
+XC_OS=${XC_OS:-linux darwin freebsd}
 
 # Install dependencies
 echo "==> Getting dependencies..."
