@@ -11,9 +11,9 @@ import (
 	"github.com/mefellows/plugo/plugo"
 )
 
-// HttpProxy implements the proxy interface for the HTTP protocol
+// HTTPProxy implements the proxy interface for the HTTP protocol
 // nolint
-type HttpProxy struct {
+type HTTPProxy struct {
 	Port          int    `required:"true"`
 	Host          string `required:"true" default:"localhost"`
 	Protocol      string `default:"http" required:"true"`
@@ -25,21 +25,21 @@ type HttpProxy struct {
 
 func init() {
 	plugo.PluginFactories.Register(func() (interface{}, error) {
-		return &HttpProxy{}, nil
+		return &HTTPProxy{}, nil
 	}, "http_proxy")
 }
 
 // Setup sets up the middleware
-func (p *HttpProxy) Setup(middleware []muxy.Middleware) {
+func (p *HTTPProxy) Setup(middleware []muxy.Middleware) {
 	p.middleware = middleware
 }
 
 // Teardown shuts down the middleware
-func (p *HttpProxy) Teardown() {
+func (p *HTTPProxy) Teardown() {
 }
 
 // Proxy performs the proxy event
-func (p *HttpProxy) Proxy() {
+func (p *HTTPProxy) Proxy() {
 	log.Info("HTTP proxy listening on %s", log.Colorize(log.BLUE, fmt.Sprintf("%s://%s:%d", p.Protocol, p.Host, p.Port)))
 	pkiMgr, err := pki.New()
 	checkHTTPServerError(err)
