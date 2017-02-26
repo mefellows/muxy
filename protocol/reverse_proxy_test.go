@@ -79,7 +79,7 @@ func TestReverseProxy(t *testing.T) {
 	if g, e := res.Header.Get("X-Foo"), "bar"; g != e {
 		t.Errorf("got X-Foo %q; expected %q", g, e)
 	}
-	if c := res.Header.Get(fakeHopHeader); c != "" {
+	if c := res.Header.Get(fakeHopHeader); c != "foo" {
 		t.Errorf("got %s header value %q", fakeHopHeader, c)
 	}
 	if g, e := len(res.Header["X-Multi-Value"]), 2; g != e {

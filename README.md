@@ -306,3 +306,7 @@ Take a look at the [HTTP Proxy](protocol/http.go) for a good working example.
 
 Middlewares implement the [Middleware](/muxy/middle.go) interface  and register themselves via `PluginFactories.register` to be available at runtime.
 Take a look at the [HTTP Delay](symptom/http_delay.go) for a good working example.
+
+## Contributing
+
+See [CONTRIBUTING](CONTRIBUTING.md).

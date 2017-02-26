@@ -13,7 +13,7 @@ cd $DIR
 
 # Get the git commit
 GIT_COMMIT=$(git rev-parse HEAD)
-GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
+# GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 
 # If its dev mode, only build for ourself
 if [ "${TF_DEV}x" != "x" ]; then
@@ -41,7 +41,6 @@ set +e
 gox \
     -os="${XC_OS}" \
     -arch="${XC_ARCH}" \
-    -ldflags "-X main.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
     -output "pkg/{{.OS}}_{{.Arch}}/{{.Dir}}" \
     ./...
 set -e
