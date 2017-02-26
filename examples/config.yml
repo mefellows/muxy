@@ -122,7 +122,7 @@ middleware:
         - "::1/128"
       target_ports:            # Target destination ports
         - "80"
-        - "1:65635"            # Ranges also valid
+        - "1:65535"            # Ranges also valid
       target_protos:           # Target protocols
         - "tcp"
         - "udp"

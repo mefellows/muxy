@@ -2,15 +2,18 @@ package protocol
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 	"github.com/mefellows/pkigo/pki"
 	"github.com/mefellows/plugo/plugo"
-	"net/http"
-	"time"
 )
 
-type HttpProxy struct {
+// HTTPProxy implements the proxy interface for the HTTP protocol
+// nolint
+type HTTPProxy struct {
 	Port          int    `required:"true"`
 	Host          string `required:"true" default:"localhost"`
 	Protocol      string `default:"http" required:"true"`
@@ -22,23 +25,26 @@ type HttpProxy struct {
 
 func init() {
 	plugo.PluginFactories.Register(func() (interface{}, error) {
-		return &HttpProxy{}, nil
+		return &HTTPProxy{}, nil
 	}, "http_proxy")
 }
 
-func (p *HttpProxy) Setup(middleware []muxy.Middleware) {
+// Setup sets up the middleware
+func (p *HTTPProxy) Setup(middleware []muxy.Middleware) {
 	p.middleware = middleware
 }
 
-func (p *HttpProxy) Teardown() {
+// Teardown shuts down the middleware
+func (p *HTTPProxy) Teardown() {
 }
 
-func (p *HttpProxy) Proxy() {
+// Proxy performs the proxy event
+func (p *HTTPProxy) Proxy() {
 	log.Info("HTTP proxy listening on %s", log.Colorize(log.BLUE, fmt.Sprintf("%s://%s:%d", p.Protocol, p.Host, p.Port)))
 	pkiMgr, err := pki.New()
-	checkHttpServerError(err)
+	checkHTTPServerError(err)
 	config, err := pkiMgr.GetClientTLSConfig()
-	checkHttpServerError(err)
+	checkHTTPServerError(err)
 	config.InsecureSkipVerify = false
 
 	mux := http.NewServeMux()
@@ -57,14 +63,14 @@ func (p *HttpProxy) Proxy() {
 		proxy.ServeHTTP(w, r)
 	})
 	if p.Protocol == "https" {
-		checkHttpServerError(err)
-		checkHttpServerError(http.ListenAndServeTLS(fmt.Sprintf("%s:%d", p.Host, p.Port), pkiMgr.Config.ClientCertPath, pkiMgr.Config.ClientKeyPath, mux))
+		checkHTTPServerError(err)
+		checkHTTPServerError(http.ListenAndServeTLS(fmt.Sprintf("%s:%d", p.Host, p.Port), pkiMgr.Config.ClientCertPath, pkiMgr.Config.ClientKeyPath, mux))
 	} else {
-		checkHttpServerError(http.ListenAndServe(fmt.Sprintf("%s:%d", p.Host, p.Port), mux))
+		checkHTTPServerError(http.ListenAndServe(fmt.Sprintf("%s:%d", p.Host, p.Port), mux))
 	}
 }
 
-func checkHttpServerError(err error) {
+func checkHTTPServerError(err error) {
 	if err != nil {
 		log.Error("ListenAndServe error: ", err.Error())
 	}

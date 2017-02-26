@@ -14,17 +14,17 @@ func Test_Example100calls(t *testing.T) {
 	fmt.Println("Waiting for Muxy..")
 
 	select {
-		case <-time.After(2 * time.Second):
+	case <-time.After(2 * time.Second):
 	}
 
 	fmt.Println("Running tests")
 
 	host := fmt.Sprintf("http://api/")
 	wait := &sync.WaitGroup{}
-	const NR_REQUESTS = 100
+	const numberOfRequests = 100
 
-	wait.Add(NR_REQUESTS)
-	for i := 0; i < NR_REQUESTS; i++ {
+	wait.Add(numberOfRequests)
+	for i := 0; i < numberOfRequests; i++ {
 		go func() {
 			defer wait.Done()
 			resp, err := http.Get(host)

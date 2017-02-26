@@ -2,16 +2,19 @@ package symptom
 
 import (
 	"bytes"
+	"io"
+	"net/http"
+
 	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 	"github.com/mefellows/plugo/plugo"
-	"io"
-	"net/http"
 	//"net/http/httptest"
 	"strings"
 	"time"
 )
 
+// RequestConfig contains details of the HTTP request to tamper with prior to
+// sending on to the target system
 type RequestConfig struct {
 	Method  string
 	Headers map[string]string
@@ -19,6 +22,8 @@ type RequestConfig struct {
 	Body    string
 }
 
+// ResponseConfig contains details of the HTTP response to tamper with prior to
+// sending on to the initiating system
 type ResponseConfig struct {
 	Headers map[string]string
 	Cookies []http.Cookie
@@ -26,6 +31,9 @@ type ResponseConfig struct {
 	Status  int
 }
 
+// HttpTampererSymptom is a plugin to mess with request/responses between
+// a consumer and provider system
+// nolint
 type HttpTampererSymptom struct {
 	Request  RequestConfig
 	Response ResponseConfig
@@ -37,10 +45,12 @@ func init() {
 	}, "http_tamperer")
 }
 
+// Setup sets up the plugin
 func (m HttpTampererSymptom) Setup() {
 	log.Debug("HTTP Error Setup()")
 }
 
+// Teardown shuts down the plugin
 func (m HttpTampererSymptom) Teardown() {
 	log.Debug("HTTP Error Teardown()")
 }
@@ -65,15 +75,18 @@ func (r *responseBody) Read(p []byte) (int, error) {
 	return len(r.body), nil
 }
 
+// HandleEvent is a hook to allow the plugin to intervene with a request/response
+// event
 func (m *HttpTampererSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
-	case muxy.EVENT_PRE_DISPATCH:
+	case muxy.EventPreDispatch:
 		m.MuckRequest(ctx)
-	case muxy.EVENT_POST_DISPATCH:
+	case muxy.EventPostDispatch:
 		m.MuckResponse(ctx)
 	}
 }
 
+// MuckRequest adds chaos to the request
 func (m *HttpTampererSymptom) MuckRequest(ctx *muxy.Context) {
 
 	// Body
@@ -105,6 +118,8 @@ func (m *HttpTampererSymptom) MuckRequest(ctx *muxy.Context) {
 		ctx.Request.Method = m.Request.Method
 	}
 }
+
+// MuckResponse adds chaos to the response
 func (m *HttpTampererSymptom) MuckResponse(ctx *muxy.Context) {
 
 	// Body

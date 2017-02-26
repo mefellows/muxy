@@ -2,19 +2,21 @@ package symptom
 
 import (
 	"bytes"
-	"github.com/mefellows/muxy/log"
-	"github.com/mefellows/muxy/muxy"
-	"github.com/mefellows/plugo/plugo"
-	"github.com/tylertreat/comcast/throttler"
 	"io"
 	l "log"
 	"net"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/mefellows/muxy/log"
+	"github.com/mefellows/muxy/muxy"
+	"github.com/mefellows/plugo/plugo"
+	"github.com/tylertreat/comcast/throttler"
 )
 
-// Shape bandwidth to mobile, slower speeds
+// ShittyNetworkSymptom allows you to modify the network speed on a host
+// e.g. shape bandwidth to mobile, slower speeds
 type ShittyNetworkSymptom struct {
 	config           throttler.Config
 	Device           string
@@ -37,10 +39,11 @@ func init() {
 
 }
 
+// Setup sets up the plugin
 func (s *ShittyNetworkSymptom) Setup() {
 	log.Debug("Setting up ShittyNetworkSymptom: Enabling firewall")
 
-	ports := ParsePorts(strings.Join(s.TargetPorts, ","))
+	ports := parsePorts(strings.Join(s.TargetPorts, ","))
 	targetIPv4, targetIPv6 := parseAddrs(strings.Join(append(s.TargetIps, s.TargetIps6...), ","))
 
 	s.config = throttler.Config{
@@ -62,17 +65,20 @@ func (s *ShittyNetworkSymptom) Setup() {
 
 }
 
-func (m ShittyNetworkSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
+// HandleEvent is the hook into the event system
+func (s ShittyNetworkSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
-	case muxy.EVENT_PRE_DISPATCH:
-		m.Muck(ctx)
+	case muxy.EventPreDispatch:
+		s.Muck(ctx)
 	}
 }
 
+// Muck is where the plugin can do any context-specific chaos
 func (s *ShittyNetworkSymptom) Muck(ctx *muxy.Context) {
 	log.Debug("ShittyNetworkSymptom Mucking...")
 }
 
+// Teardown shuts down the plugin
 func (s *ShittyNetworkSymptom) Teardown() {
 	log.Debug("Tearing down ShittyNetworkSymptom")
 	s.config.Stop = true
@@ -118,7 +124,7 @@ func parseLoss(loss string) float64 {
 	}
 	l, err := strconv.ParseFloat(val, 64)
 	if err != nil {
-		log.Fatalf("Incorrectly specified packet loss:", loss)
+		log.Fatal("Incorrectly specified packet loss:", loss)
 	}
 	return l
 }
@@ -146,7 +152,7 @@ func parseAddrs(addrs string) ([]string, []string) {
 						parsedIPv6 = append(parsedIPv6, net.String())
 					}
 				} else {
-					log.Fatalf("Incorrectly specified target IP or CIDR:", adr)
+					log.Fatal("Incorrectly specified target IP or CIDR:", adr)
 				}
 			}
 		}
@@ -155,7 +161,7 @@ func parseAddrs(addrs string) ([]string, []string) {
 	return parsedIPv4, parsedIPv6
 }
 
-func ParsePorts(ports string) []string {
+func parsePorts(ports string) []string {
 	prts := strings.Split(ports, ",")
 	parsed := []string{}
 
@@ -165,13 +171,13 @@ func ParsePorts(ports string) []string {
 				if validRange(prt) {
 					parsed = append(parsed, prt)
 				} else {
-					log.Fatalf("Incorrectly specified port range:", prt)
+					log.Fatal("Incorrectly specified port range:", prt)
 				}
 			} else { //Isn't a range, check if just a single port
 				if validPort(prt) {
 					parsed = append(parsed, prt)
 				} else {
-					log.Fatalf("Incorrectly specified port:", prt)
+					log.Fatal("Incorrectly specified port:", prt)
 				}
 			}
 		}
@@ -231,7 +237,7 @@ func parseProtos(protos string) []string {
 				p == "icmp" {
 				parsed = append(parsed, p)
 			} else {
-				log.Fatalf("Incorrectly specified protocol:", p)
+				log.Fatal("Incorrectly specified protocol:", p)
 			}
 		}
 	}

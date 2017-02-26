@@ -4,8 +4,7 @@ import (
 	"net/http"
 )
 
-// The request context given to Middlewares and Symptoms.
-
+// Context is the request context given to Middlewares and Symptoms.
 type Context struct {
 	Request        *http.Request
 	Response       *http.Response

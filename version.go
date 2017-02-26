@@ -1,4 +1,7 @@
 package main
 
-const VERSION = "0.0.1"
-const APPLICATION_NAME = "Muxy"
+// Version is the current app version
+const Version = "0.0.1"
+
+// ApplicationName is the app name
+const ApplicationName = "Muxy"

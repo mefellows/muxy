@@ -3,6 +3,10 @@
 # This script builds the application from source for multiple platforms.
 set -e
 
+# Build deps
+go get -u github.com/mitchellh/gox
+go get -u golang.org/x/tools/cmd/stringer
+
 # Get the parent directory of where this script is.
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
@@ -13,7 +17,6 @@ cd $DIR
 
 # Get the git commit
 GIT_COMMIT=$(git rev-parse HEAD)
-GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 
 # If its dev mode, only build for ourself
 if [ "${TF_DEV}x" != "x" ]; then
@@ -22,8 +25,8 @@ if [ "${TF_DEV}x" != "x" ]; then
 fi
 
 # Determine the arch/os combos we're building for
-XC_ARCH=${XC_ARCH:-"386 amd64 arm"}
-XC_OS=${XC_OS:-linux darwin freebsd openbsd}
+XC_ARCH=${XC_ARCH:-"386 amd64"}
+XC_OS=${XC_OS:-linux darwin freebsd}
 
 # Install dependencies
 echo "==> Getting dependencies..."
@@ -41,9 +44,8 @@ set +e
 gox \
     -os="${XC_OS}" \
     -arch="${XC_ARCH}" \
-    -ldflags "-X main.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" \
     -output "pkg/{{.OS}}_{{.Arch}}/{{.Dir}}" \
-    ./...
+    .
 set -e
 
 # Move all the compiled things to the $GOPATH/bin
@@ -68,4 +70,4 @@ done
 # Done!
 echo
 echo "==> Results:"
-ls -hl bin/
+ls -hl pkg/

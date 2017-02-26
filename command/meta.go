@@ -2,6 +2,7 @@ package command
 
 import "github.com/mitchellh/cli"
 
+// Meta is used by the CLI commands
 type Meta struct {
-	Ui cli.Ui
+	UI cli.Ui
 }

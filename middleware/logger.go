@@ -2,18 +2,19 @@ package middleware
 
 import (
 	"fmt"
+
 	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 	"github.com/mefellows/plugo/plugo"
-	"time"
 )
 
+// LoggerMiddleware is middleware that will log all request/responses at
+// a configured level
 type LoggerMiddleware struct {
 	HexOutput bool `mapstructure:"hex_output"`
 	format    string
 }
 
-const DEFAULT_DELAY = 2 * time.Second
 const bytesTab = "\n\t\t\t\t\t\t"
 
 func init() {
@@ -22,6 +23,7 @@ func init() {
 	}, "logger")
 }
 
+// Setup sets up the middleware
 func (l *LoggerMiddleware) Setup() {
 	if l.HexOutput {
 		l.format = "%x"
@@ -30,12 +32,14 @@ func (l *LoggerMiddleware) Setup() {
 	}
 }
 
+// Teardown shuts down the middleware
 func (LoggerMiddleware) Teardown() {
 }
 
+// HandleEvent takes a ProxyEvent and acts on the information provided
 func (l *LoggerMiddleware) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
-	case muxy.EVENT_PRE_DISPATCH:
+	case muxy.EventPreDispatch:
 		if ctx.Request == nil {
 			if len(ctx.Bytes) > 0 {
 				log.Info("Handle TCP event " + log.Colorize(log.GREY, "PRE_DISPATCH") + fmt.Sprintf(" Received %d%s", len(ctx.Bytes), " bytes"))
@@ -47,7 +51,7 @@ func (l *LoggerMiddleware) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 				log.Colorize(log.LIGHTMAGENTA, ctx.Request.Method) +
 				log.Colorize(log.BLUE, " \""+ctx.Request.URL.String()+"\""))
 		}
-	case muxy.EVENT_POST_DISPATCH:
+	case muxy.EventPostDispatch:
 		if ctx.Request == nil {
 			if len(ctx.Bytes) > 0 {
 				log.Info("Handle TCP event " + log.Colorize(log.GREY, "POST_DISPATCH") + fmt.Sprintf(" Sent %d%s", len(ctx.Bytes), " bytes"))
