@@ -39,7 +39,7 @@ If you are building a distributed system, Muxy can help you test your resilience
 * Ideal for use in CI/Test Suites to test resilience across languages/technologies
 * Simple native binary installation with no dependencies
 * Extensible and modular architecture
-* An official Docker [container][https://github.com/mefellows/docker-muxy] to simplify uses cases such as Docker Compose
+* An official Docker [container](https://github.com/mefellows/docker-muxy) to simplify uses cases such as Docker Compose
 
 ## Installation
 
