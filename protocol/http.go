@@ -20,6 +20,7 @@ type HTTPProxy struct {
 	ProxyHost     string `required:"true" mapstructure:"proxy_host"`
 	ProxyPort     int    `required:"true" mapstructure:"proxy_port"`
 	ProxyProtocol string `required:"true" default:"http" mapstructure:"proxy_protocol"`
+	Insecure      bool   `required:"true" default:"false" mapstructure:"insecure"`
 	middleware    []muxy.Middleware
 }
 
@@ -45,7 +46,7 @@ func (p *HTTPProxy) Proxy() {
 	checkHTTPServerError(err)
 	config, err := pkiMgr.GetClientTLSConfig()
 	checkHTTPServerError(err)
-	config.InsecureSkipVerify = false
+	config.InsecureSkipVerify = p.Insecure
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
