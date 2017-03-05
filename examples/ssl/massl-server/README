@@ -1,0 +1,6 @@
+# Test
+curl --cacert ca.pem -E ./client.p12:password -v https://localhost:8080/hello
+
+# Create pkcs12 file 
+openssl pkcs12 -export -in cert.pem -inkey cert-key.pem -out client.p12 # use 'password'
+curl --cacert ~/.pki/ca/ca.pem -E ./client.p12:password -v https://localhost:8080/hello
