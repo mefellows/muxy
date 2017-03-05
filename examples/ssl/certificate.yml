@@ -1,0 +1,66 @@
+## Test configuration name. Used for reporting.
+name: Network and HTTP screwer.
+
+## Test Description. Used for reporting
+description: Slow network to mobile levels, and add 1s delay to all messages
+
+## Specify log output level
+##
+## Log Levels supported:
+## Trace (0), Debug (1), Info (2, Default), Warn (3), Error (4), Fatal (5)
+loglevel: 0
+
+## Configure a proxy that will handle your requests, and forward
+## to proxied host.
+##
+## Currently supports `tcp_proxy` and `http_proxy`.
+proxy:
+
+  ## HTTP Proxy: Configures an HTTP Proxy
+  ##
+  ## NOTE: SSL is currently not supported
+  - name: http_proxy
+    config:
+      host: 0.0.0.0
+      port: 8000
+      protocol: https
+      proxy_host: localhost
+      proxy_port: 8080
+      proxy_protocol: https
+      # proxy_ssl_key: /Users/mfellows/go/src/github.com/mefellows/muxy/ssl/client/test.key
+      # proxy_ssl_cert: /Users/mfellows/go/src/github.com/mefellows/muxy/ssl/client/test.crt
+      proxy_client_ssl_key: /Users/mfellows/.pki/certs/cert-key.pem
+      proxy_client_ssl_cert: /Users/mfellows/.pki/certs/cert.pem
+      proxy_client_ssl_ca: /Users/mfellows/.pki/ca/ca.pem
+      insecure: true # allow insecure https
+
+## Middleware
+##
+## Middleware are plugins that are given the opportunity to intervene
+## before a request is dispatched to the proxied system (PRE_DISPATCH event)
+## and afterwards (POST_DISPATCH event). They are given a reference to
+## the current context (HTTP Context or []bytes) and can mutate them.
+##
+## Middleware are executed in the order specified in this config.
+##
+middleware:
+
+  ## HTTP Tamperer - Messes with Layer 7.
+  ##
+  ## Useful for messing with the HTTP protocol
+  ##
+  # - name: http_tamperer
+  #   config:
+  #     response:
+  #       headers:
+  #         content_length: "87"
+  #       status: 500              # Override HTTP Status code
+  #       body: |
+  #         { "status": { "code": "API-200", "message": "Success" }, "certificateValue": "faoeu" }
+
+  ## Request Logger - use this to see what's going in/out of the Proxy.
+  ##
+  ##
+  - name: logger
+    config:
+      hex_output: false        # Display output as Hex instead of a string
