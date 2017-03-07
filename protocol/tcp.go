@@ -160,10 +160,10 @@ func (p *proxy) pipe(src io.Reader, dst io.Writer) {
 		for _, middleware := range p.middleware {
 			log.Trace("TCP Proxy applying middleware %v", middleware)
 			if islocal {
-				middleware.HandleEvent(muxy.EventPostDispatch, ctx)
+				middleware.HandleEvent(muxy.EventPreDispatch, ctx)
 				log.Trace("TCP Proxy overwriting bytes sent to target: %s", ctx.Bytes)
 			} else {
-				middleware.HandleEvent(muxy.EventPreDispatch, ctx)
+				middleware.HandleEvent(muxy.EventPostDispatch, ctx)
 				log.Trace("TCP Proxy overwriting bytes sent to client: %s", ctx.Bytes)
 			}
 			b = ctx.Bytes
