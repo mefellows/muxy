@@ -9,7 +9,6 @@ import (
 )
 
 // Level to set
-// nolint
 type Level int
 
 // Colour type to print in log messages
