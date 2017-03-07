@@ -290,7 +290,7 @@ The TCP Tamperer is a Layer 5 tamperer, modifying the messages in and around TCP
 sessions. Crudely, you can set the body of inbound and outbound TCP packets, truncate
 the last character of messages or randomise the text over the wire.
 
-```
+```yaml
 - name: tcp_tamperer
   config:
     request:
@@ -324,8 +324,7 @@ Refer to the [example](/examples/config.yml) YAML file for a full reference.
 
 ### Hystrix
 
-Using the [Hystrix Go](https://github.com/afex/hystrix-go) library, we use Muxy to trigger a circuit breaker and return a
-canned response, ensuring we don't have downtime. View the [example](examples/hystrix).
+Using the [Hystrix Go](https://github.com/afex/hystrix-go) library, we use Muxy to trigger a circuit breaker and return a canned response, ensuring we don't have downtime. View the [example](examples/hystrix).
 
 ## Usage with Docker
 
