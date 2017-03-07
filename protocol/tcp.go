@@ -10,9 +10,8 @@ import (
 	"github.com/mefellows/plugo/plugo"
 )
 
-// TcpProxy implements a TCP proxy
-// nolint
-type TcpProxy struct {
+// TCPProxy implements a TCP proxy
+type TCPProxy struct {
 	Port            int    `required:"true"`
 	Host            string `required:"true" default:"localhost"`
 	ProxyHost       string `required:"true" mapstructure:"proxy_host"`
@@ -26,7 +25,7 @@ type TcpProxy struct {
 
 func init() {
 	plugo.PluginFactories.Register(func() (interface{}, error) {
-		return &TcpProxy{}, nil
+		return &TCPProxy{}, nil
 	}, "tcp_proxy")
 }
 
@@ -37,16 +36,16 @@ func check(err error) {
 }
 
 // Setup sets up the TCP proxy
-func (p *TcpProxy) Setup(middleware []muxy.Middleware) {
+func (p *TCPProxy) Setup(middleware []muxy.Middleware) {
 	p.middleware = middleware
 }
 
 // Teardown shuts down the TCP proxy
-func (p *TcpProxy) Teardown() {
+func (p *TCPProxy) Teardown() {
 }
 
 // Proxy runs the TCP proxy
-func (p *TcpProxy) Proxy() {
+func (p *TCPProxy) Proxy() {
 	log.Trace("Checking connection: %s:%d", p.Host, p.Port)
 	laddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", p.Host, p.Port))
 	check(err)
@@ -57,7 +56,7 @@ func (p *TcpProxy) Proxy() {
 	check(err)
 
 	for {
-		log.Info("TCP proxy listening on %s", log.Colorize(log.BLUE, fmt.Sprintf("tcp://%s:%d", p.Host, p.Port)))
+		log.Info("TCP Proxy proxy listening on %s", log.Colorize(log.BLUE, fmt.Sprintf("tcp://%s:%d", p.Host, p.Port)))
 		conn, err := listener.AcceptTCP()
 		if err != nil {
 			fmt.Printf("Failed to accept connection '%s'\n", err)
@@ -112,13 +111,13 @@ func (p *proxy) err(s string, err error) {
 
 func (p *proxy) start() {
 
-	log.Trace("Starting TCP Proxy")
+	log.Trace("TCP Proxy Starting TCP Proxy")
 
 	defer p.lconn.Close()
 	//connect to remote
 	rconn, err := net.DialTCP("tcp", nil, p.raddr)
 	if err != nil {
-		p.err("Remote connection failed: %s", err)
+		p.err("TCP Proxy remote connection failed: %s", err)
 		return
 	}
 	p.rconn = rconn
@@ -129,14 +128,15 @@ func (p *proxy) start() {
 		p.rconn.SetNoDelay(true)
 	}
 	//display both ends
-	log.Info("Opened %s >>> %s", p.lconn.RemoteAddr().String(), p.rconn.RemoteAddr().String())
+	log.Info("TCP Proxy opened %s >>> %s", p.lconn.RemoteAddr().String(), p.rconn.RemoteAddr().String())
 
 	//bidirectional copy
 	go p.pipe(p.lconn, p.rconn)
 	go p.pipe(p.rconn, p.lconn)
 	//wait for close...
+
 	<-p.errsig
-	log.Info("Closed (%d bytes sent, %d bytes received)", p.sentBytes, p.receivedBytes)
+	log.Info("TCP Proxy closed (%d bytes sent, %d bytes received)", p.sentBytes, p.receivedBytes)
 }
 
 func (p *proxy) pipe(src io.Reader, dst io.Writer) {
@@ -149,7 +149,7 @@ func (p *proxy) pipe(src io.Reader, dst io.Writer) {
 		n, readErr := src.Read(buff)
 		if readErr != nil || n == 0 {
 			if !islocal {
-				p.err("Read failed '%s'\n", readErr)
+				p.err("TCP Proxy read failed '%s'\n", readErr)
 			}
 			done = true
 		}
@@ -158,17 +158,21 @@ func (p *proxy) pipe(src io.Reader, dst io.Writer) {
 
 		ctx := &muxy.Context{Bytes: b}
 		for _, middleware := range p.middleware {
+			log.Trace("TCP Proxy applying middleware %v", middleware)
 			if islocal {
-				middleware.HandleEvent(muxy.EventPreDispatch, ctx)
-			} else {
 				middleware.HandleEvent(muxy.EventPostDispatch, ctx)
+				log.Trace("TCP Proxy overwriting bytes sent to target: %s", ctx.Bytes)
+			} else {
+				middleware.HandleEvent(muxy.EventPreDispatch, ctx)
+				log.Trace("TCP Proxy overwriting bytes sent to client: %s", ctx.Bytes)
 			}
+			b = ctx.Bytes
 		}
 
 		n, err := dst.Write(b)
 		if err != nil {
-			log.Error("Write failed: %s", err.Error())
-			p.err("Write failed '%s'\n", err)
+			log.Error("TCP Proxy write failed: %s", err.Error())
+			p.err("TCP Proxy write failed '%s'\n", err)
 
 			return
 		}
