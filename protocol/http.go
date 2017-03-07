@@ -15,7 +15,6 @@ import (
 )
 
 // HTTPProxy implements the proxy interface for the HTTP protocol
-// nolint
 type HTTPProxy struct {
 	Port                int    `required:"true"`
 	Host                string `required:"true" default:"localhost"`
