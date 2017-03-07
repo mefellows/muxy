@@ -88,10 +88,11 @@ Muxy is typically used in two ways:
     # Proxy plugins
     middleware:
 
-      # HTTP response delay plugin
-      - name: http_delay
+      # Message Delay request/response plugin
+      - name: delay
         config:
-          delay: 5
+          request_delay: 1000
+          response_delay: 500
 
       # Log in/out messages
       - name: logger
@@ -168,9 +169,10 @@ Example configuration snippet:
 
 ```yaml
 middleware:
-  - name: http_delay
+  - name: delay
     config:
-      delay: 1                 # Delay in seconds to apply to response
+      request_delay: 1000      # Delay in ms to apply to request to target
+      response_delay: 500      # Delay in ms to apply to response from target
 ```
 
 #### HTTP Tamperer
