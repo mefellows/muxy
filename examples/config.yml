@@ -96,13 +96,14 @@ middleware:
     config:
       hex_output: false        # Display output as Hex instead of a string
 
-  ## HTTP Response delay
+  ## HTTP/TCP Response delay
   ##
   ## Simple middleware that delays an HTTP response up to `delay` seconds
   ##
-  - name: http_delay
+  - name: delay
     config:
-      delay: 1                 # Delay in seconds to apply to response
+      request_delay:  100                 # Delay in ms to apply to request
+      response_delay: 500                 # Delay in ms to apply to response
 
   ## Network Shaper - Layer 4 Tamperer.
   ##
