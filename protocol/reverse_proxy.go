@@ -206,7 +206,13 @@ func (p *ReverseProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	defer res.Body.Close()
 
 	// Fire Post-dispatch middleware event
-	ctx = &muxy.Context{req, res, rw, nil} // nolint
+	ctx = &muxy.Context{
+		Request:        req,
+		Response:       res,
+		ResponseWriter: rw,
+		Bytes:          nil,
+	}
+
 	for _, middleware := range p.Middleware {
 		middleware.HandleEvent(muxy.EventPostDispatch, ctx)
 	}
