@@ -74,32 +74,40 @@ func (m *TCPTampererSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 
 // MuckRequest adds chaos to the request
 func (m *TCPTampererSymptom) MuckRequest(ctx *muxy.Context) {
-	if m.Request.Truncate {
-		if len(ctx.Bytes) >= 2 {
-			ctx.Bytes = ctx.Bytes[:len(ctx.Bytes)-2]
-		}
+	if m.Request.Body != "" {
+		log.Debug("TCP Tamperer - replacing body [%s] with [%s]", ctx.Bytes, m.Request.Body)
+		ctx.Bytes = []byte(m.Request.Body)
 	}
 	if m.Request.Randomize {
-		ctx.Bytes = randStringBytesMaskImprSrc(len(ctx.Bytes))
+		random := randStringBytesMaskImprSrc(len(ctx.Bytes))
+		log.Debug("TCP Tamperer - randomizing body [%s] with [%s]", ctx.Bytes, random)
+		ctx.Bytes = random
 	}
-	if m.Request.Body != "" {
-		ctx.Bytes = []byte(m.Request.Body)
+	if m.Request.Truncate {
+		if len(ctx.Bytes) >= 2 {
+			log.Debug("TCP Tamperer - randomizing body [%s] with [%s]", ctx.Bytes, ctx.Bytes[:len(ctx.Bytes)-2])
+			ctx.Bytes = ctx.Bytes[:len(ctx.Bytes)-2]
+		}
 	}
 }
 
 // MuckResponse adds chaos to the response
 func (m *TCPTampererSymptom) MuckResponse(ctx *muxy.Context) {
+	if m.Response.Body != "" {
+		log.Debug("TCP Tamperer - replacing body [%s] with [%s]", ctx.Bytes, m.Request.Body)
+		ctx.Bytes = []byte(m.Response.Body)
+	}
+	if m.Response.Randomize {
+		random := randStringBytesMaskImprSrc(len(ctx.Bytes))
+		log.Debug("TCP Tamperer - randomizing body [%s] with [%s]", ctx.Bytes, random)
+		ctx.Bytes = random
+	}
 	if m.Response.Truncate {
 		// TODO: why 2 and 3?
 		if len(ctx.Bytes) >= 3 {
+			log.Debug("TCP Tamperer - randomizing body [%s] with [%s]", ctx.Bytes, ctx.Bytes[:len(ctx.Bytes)-3])
 			ctx.Bytes = ctx.Bytes[:len(ctx.Bytes)-3]
 		}
-	}
-	if m.Response.Randomize {
-		ctx.Bytes = randStringBytesMaskImprSrc(len(ctx.Bytes))
-	}
-	if m.Response.Body != "" {
-		ctx.Bytes = []byte(m.Response.Body)
 	}
 }
 
