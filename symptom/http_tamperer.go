@@ -22,6 +22,7 @@ type RequestConfig struct {
 	Cookies []http.Cookie
 	Body    string
 	Path    string
+	Host    string
 }
 
 // ResponseConfig contains details of the HTTP response to tamper with prior to
@@ -94,6 +95,12 @@ func (m *HTTPTampererSymptom) MuckRequest(ctx *muxy.Context) {
 	if m.Request.Path != "" {
 		log.Debug("HTTP Tamperer Spoofing HTTP URI from [%s] to [%s]", ctx.Request.URL.Path, log.Colorize(log.BLUE, m.Request.Path))
 		ctx.Request.URL.Path = m.Request.Path
+	}
+
+	// Host
+	if m.Request.Host != "" {
+		log.Debug("HTTP Tamperer Spoofing HTTP Host from [%s] to [%s]", ctx.Request.URL.Host, log.Colorize(log.BLUE, m.Request.Host))
+		ctx.Request.Host = m.Request.Host
 	}
 
 	// Body
