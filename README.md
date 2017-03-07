@@ -47,6 +47,7 @@ If you are building a distributed system, Muxy can help you test your resilience
 ## Features
 
 * Ability to tamper with network devices at the transport level (Layer 4)
+* Ability to tamper with the TCP session layer (Layer 5)
 * ...and HTTP requests/responses at the HTTP protocol level (Layer 7)
 * Simulate real-world network connectivity problems/partitions for mobile devices, distributed systems etc.
 * Ideal for use in CI/Test Suites to test resilience across languages/technologies
