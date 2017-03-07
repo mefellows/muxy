@@ -41,7 +41,7 @@ func init() {
 
 // Setup sets up the plugin
 func (s *ShittyNetworkSymptom) Setup() {
-	log.Debug("Setting up ShittyNetworkSymptom: Enabling firewall")
+	log.Debug("ShittyNetworkSymptom - Setup()")
 
 	ports := parsePorts(strings.Join(s.TargetPorts, ","))
 	targetIPv4, targetIPv6 := parseAddrs(strings.Join(append(s.TargetIps, s.TargetIps6...), ","))
@@ -75,12 +75,12 @@ func (s ShittyNetworkSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) 
 
 // Muck is where the plugin can do any context-specific chaos
 func (s *ShittyNetworkSymptom) Muck(ctx *muxy.Context) {
-	log.Debug("ShittyNetworkSymptom Mucking...")
+	log.Debug("ShittyNetworkSymptom - Mucking...")
 }
 
 // Teardown shuts down the plugin
 func (s *ShittyNetworkSymptom) Teardown() {
-	log.Debug("Tearing down ShittyNetworkSymptom")
+	log.Debug("ShittyNetworkSymptom - Teardown()")
 	s.config.Stop = true
 	supressOutput(func() {
 		throttler.Run(&s.config)
@@ -124,7 +124,7 @@ func parseLoss(loss string) float64 {
 	}
 	l, err := strconv.ParseFloat(val, 64)
 	if err != nil {
-		log.Fatal("Incorrectly specified packet loss:", loss)
+		log.Fatal("ShittyNetworkSymptom - Incorrectly specified packet loss:", loss)
 	}
 	return l
 }
@@ -152,7 +152,7 @@ func parseAddrs(addrs string) ([]string, []string) {
 						parsedIPv6 = append(parsedIPv6, net.String())
 					}
 				} else {
-					log.Fatal("Incorrectly specified target IP or CIDR:", adr)
+					log.Fatal("ShittyNetworkSymptom - Incorrectly specified target IP or CIDR:", adr)
 				}
 			}
 		}
@@ -171,13 +171,13 @@ func parsePorts(ports string) []string {
 				if validRange(prt) {
 					parsed = append(parsed, prt)
 				} else {
-					log.Fatal("Incorrectly specified port range:", prt)
+					log.Fatal("ShittyNetworkSymptom - Incorrectly specified port range:", prt)
 				}
 			} else { //Isn't a range, check if just a single port
 				if validPort(prt) {
 					parsed = append(parsed, prt)
 				} else {
-					log.Fatal("Incorrectly specified port:", prt)
+					log.Fatal("ShittyNetworkSymptom - Incorrectly specified port:", prt)
 				}
 			}
 		}
@@ -237,7 +237,7 @@ func parseProtos(protos string) []string {
 				p == "icmp" {
 				parsed = append(parsed, p)
 			} else {
-				log.Fatal("Incorrectly specified protocol:", p)
+				log.Fatal("ShittyNetworkSymptom - Incorrectly specified protocol:", p)
 			}
 		}
 	}
