@@ -8,7 +8,7 @@ import (
 	"github.com/mefellows/plugo/plugo"
 )
 
-// HTTPDelaySymptom adds specified delays to HTTP requests
+// HTTPDelaySymptom adds specified delays to requests Symptom
 // Update docs: these values should be in ms
 type HTTPDelaySymptom struct {
 	RequestDelay  int `required:"false" mapstructure:"request_delay"`
@@ -27,12 +27,12 @@ func init() {
 
 // Setup sets up the delay plugin
 func (m HTTPDelaySymptom) Setup() {
-	log.Debug("HTTP Delay Setup()")
+	log.Debug("Delay Symptom - Setup()")
 }
 
 // Teardown shuts down the plugin
 func (m HTTPDelaySymptom) Teardown() {
-	log.Debug("HTTP Delay Teardown()")
+	log.Debug("Delay Symptom - Teardown()")
 }
 
 // HandleEvent takes a proxy event for the proxy to intercept and modify
@@ -54,7 +54,7 @@ func (m HTTPDelaySymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 // Muck injects chaos into the system
 func (m *HTTPDelaySymptom) Muck(ctx *muxy.Context, wait int) {
 	delay := time.Duration(wait) * time.Millisecond
-	log.Debug("HTTP Delay Muck(), delaying for %v seconds\n", delay.Seconds())
+	log.Debug("Delay Symptom - Muck(), delaying for %v seconds", delay.Seconds())
 
 	for {
 		select {
