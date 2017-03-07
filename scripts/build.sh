@@ -15,9 +15,6 @@ DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
 # Change into that directory
 cd $DIR
 
-# Get the git commit
-GIT_COMMIT=$(git rev-parse HEAD)
-
 # If its dev mode, only build for ourself
 if [ "${TF_DEV}x" != "x" ]; then
     XC_OS=${XC_OS:-$(go env GOOS)}

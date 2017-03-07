@@ -1,0 +1,62 @@
+## Test configuration name. Used for reporting.
+name: TCP Tampering Example
+
+## Test Description. Used for reporting
+description: Tamper with TCP messages
+
+## Specify log output level
+##
+## Log Levels supported:
+## Trace (0), Debug (1), Info (2, Default), Warn (3), Error (4), Fatal (5)
+loglevel: 1
+
+## Configure a proxy that will handle your requests, and forward
+## to proxied host.
+##
+## Currently supports `tcp_proxy` and `http_proxy`.
+proxy:
+
+  # Configures a TCP proxy
+  #
+  # NOTE: TLS is currently not supported
+  - name: tcp_proxy
+    config:
+      host: 0.0.0.0           # Local address to bind to and accept connections. May be an IP/hostname
+      port: 8001              # Local port to bind to
+      proxy_host: 0.0.0.0     # Proxy server port
+      proxy_port: 8000        # Proxied server port
+      nagles_algorithm: true  # Use Nagles algorithm?
+      packet_size: 64         # Size of each contiguous network packet to proxy
+
+## Middleware
+##
+## Middleware are plugins that are given the opportunity to intervene
+## before a request is dispatched to the proxied system (PRE_DISPATCH event)
+## and afterwards (POST_DISPATCH event). They are given a reference to
+## the current context (HTTP Context or []bytes) and can mutate them.
+##
+## Middleware are executed in the order specified in this config.
+##
+middleware:
+
+  ## TCP Tamperer - Messes with Layer 5.
+  ##
+  ## Useful for messing with the TCP protocol
+  ##
+  - name: tcp_tamperer
+    config:
+      request:
+        body: "wow, new request!"   # Override request body
+        randomize: true             # Replaces input mesage with a random string
+        truncate: true              # Removes last character from the request message
+      response:
+        body: "wow, new response!" # Override response body
+        randomize: true             # Replaces response mesage with a random string
+        truncate: true              # Removes last character from the response message
+
+  ## Request Logger - use this to see what's going in/out of the Proxy.
+  ##
+  ##
+  - name: logger
+    config:
+      hex_output: false        # Display output as Hex instead of a string

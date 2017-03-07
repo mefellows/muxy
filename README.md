@@ -11,25 +11,38 @@ Muxy is a proxy that _mucks_ with your system and application context, operating
 If you are building a distributed system, Muxy can help you test your resilience and fault tolerance patterns.
 
 ### Contents
+<!-- TOC depthFrom:2 depthTo:4 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-  * [Features](#features)
-  * [Installation](#installation)
-  * [Using Muxy](#using-muxy)
-    * [5 Minute Quick Start](#5-minute-example)
-  * [Muxy Components](#proxies-and-middlewares)
-    * [Proxies](#proxies)
-      * [HTTP Proxy](#http-proxy)
-      * [TCP Proxy](#tcp-proxy)
-    * [Middleware](#middleware)
-      * [HTTP Delay](#http-delay)
-      * [HTTP Tamperer](#http-tamperer)
-      * [Network Shaper](#network-shaper)
-      * [Logger](#logger)
-  * [YAML Configuration Reference](#configuration-reference)
-  * [Examples](#examples)
-    * [Go Hystrix](#hystrix)
-  * [Using Docker](#docker)
-  * [Extending Muxy](#extending-muxy)
+- [Introduction](#introduction)
+	- [Contents](#contents)
+- [Features](#features)
+- [Installation](#installation)
+	- [On Mac OSX using Homebrew](#on-mac-osx-using-homebrew)
+	- [Using Go Get](#using-go-get)
+- [Using Muxy](#using-muxy)
+	- [5-minute example](#5-minute-example)
+	- [Muxy as part of a test suite](#muxy-as-part-of-a-test-suite)
+	- [Notes](#notes)
+- [Proxies and Middlewares](#proxies-and-middlewares)
+	- [Proxies](#proxies)
+		- [HTTP Proxy](#http-proxy)
+		- [TCP Proxy](#tcp-proxy)
+	- [Middleware](#middleware)
+		- [Delay](#delay)
+		- [HTTP Tamperer](#http-tamperer)
+		- [Network Shaper](#network-shaper)
+		- [TCP Tamperer](#tcp-tamperer)
+		- [Logger](#logger)
+- [Configuration Reference](#configuration-reference)
+- [Examples](#examples)
+	- [Hystrix](#hystrix)
+- [Usage with Docker](#usage-with-docker)
+- [Extending Muxy](#extending-muxy)
+	- [Proxies](#proxies)
+	- [Middleware](#middleware)
+- [Contributing](#contributing)
+
+<!-- /TOC -->
 
 ## Features
 
@@ -82,19 +95,25 @@ Muxy is typically used in two ways:
         config:
           host: 0.0.0.0
           port: 8181
-          proxy_host: onegeek.com.au
+          proxy_host: www.onegeek.com.au
           proxy_port: 80
 
     # Proxy plugins
     middleware:
-
-      # HTTP response delay plugin
-      - name: http_delay
+      - name: http_tamperer
         config:
-          delay: 5
+          request:
+            host: "www.onegeek.com.au"
+
+      # Message Delay request/response plugin
+      - name: delay
+        config:
+          request_delay: 1000
+          response_delay: 500
 
       # Log in/out messages
       - name: logger
+
     ```
 1. Run Muxy with your config: `muxy proxy --config ./config.yml`
 1. Make a request to www.onegeek.com via the proxy: `time curl -v -H"Host: www.onegeek.com.au" http://localhost:8181/`. Compare that with a request direct to the website: `time curl -v www.onegeek.com.au` - it should be approximately 5s faster.
@@ -121,7 +140,7 @@ It is also recommended to run within a container/virtual machine to avoid uninte
 ### Proxies
 #### HTTP Proxy
 
-Simple HTTP Proxy that starts up on a local IP/Hostname and Port.
+Simple HTTP(s) Proxy that starts up on a local IP/Hostname and Port.
 
 Example configuration snippet:
 
@@ -129,12 +148,27 @@ Example configuration snippet:
 proxy:
   - name: http_proxy
     config:
+      ## Proxy host details
       host: 0.0.0.0
       protocol: http
       port: 8181
+
+      ## Proxy target details
       proxy_host: 0.0.0.0
       proxy_port: 8282
       proxy_protocol: https
+
+      ## Certificate to present to Muxy clients (i.e. server certs)
+      proxy_ssl_key: proxy-server/test.key
+      proxy_ssl_cert: proxy-server/test.crt
+
+      ## Certificate to present to Muxy proxy targets (i.e. client certs)
+      proxy_client_ssl_key: client-certs/cert-key.pem
+      proxy_client_ssl_cert: client-certs/cert.pem
+      proxy_client_ssl_ca: client-certs/ca.pem
+
+      ## Enable this to proxy targets we don't trust
+      # insecure: true # allow insecure https      
 ```
 
 #### TCP Proxy
@@ -160,17 +194,19 @@ proxy:
 Middleware have the ability to intervene upon receiving a request (Pre-Dispatch) or before sending the response back to the client (Post-Dispatch).
 In some cases, such as the Network Shaper, the effect is applied _before any request is made_ (e.g. if the local network device configuration is altered).
 
-#### HTTP Delay
+#### Delay
 
-A basic middleware that simply adds a delay of `delay` seconds.
+A basic middleware that simply adds a delay of `delay` milliseconds to the request
+or response.
 
 Example configuration snippet:
 
 ```yaml
 middleware:
-  - name: http_delay
+  - name: delay
     config:
-      delay: 1                 # Delay in seconds to apply to response
+      request_delay: 1000      # Delay in ms to apply to request to target
+      response_delay: 500      # Delay in ms to apply to response from target
 ```
 
 #### HTTP Tamperer
@@ -184,6 +220,8 @@ middleware:
   - name: http_tamperer
     config:
       request:
+        host:       "somehost"   # Override Host header that's sent to target
+        path:             "/"    # Override the request path
         method:           "GET"  # Override request method
         headers:
           x_my_request:   "foo"  # Override request header
@@ -245,6 +283,26 @@ middleware:
         - "udp"
         - "icmp"
 ```
+
+#### TCP Tamperer
+
+The TCP Tamperer is a Layer 5 tamperer, modifying the messages in and around TCP
+sessions. Crudely, you can set the body of inbound and outbound TCP packets, truncate
+the last character of messages or randomise the text over the wire.
+
+```
+- name: tcp_tamperer
+  config:
+    request:
+      body: "wow, new request!"   # Override request body
+      randomize: true             # Replaces input message with a random string
+      truncate: true              # Removes last character from the request message
+    response:
+      body: "wow, new response!" # Override response body
+      randomize: true             # Replaces response message with a random string
+      truncate: true              # Removes last character from the response message
+```
+
 #### Logger
 
 Log the in/out messages, optionally requesting the output to be hex encoded.
@@ -269,7 +327,7 @@ Refer to the [example](/examples/config.yml) YAML file for a full reference.
 Using the [Hystrix Go](https://github.com/afex/hystrix-go) library, we use Muxy to trigger a circuit breaker and return a
 canned response, ensuring we don't have downtime. View the [example](examples/hystrix).
 
-## Docker
+## Usage with Docker
 
 Download the [Docker image](https://github.com/mefellows/docker-muxy) by running:
 

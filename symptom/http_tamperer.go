@@ -2,6 +2,7 @@ package symptom
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -20,6 +21,8 @@ type RequestConfig struct {
 	Headers map[string]string
 	Cookies []http.Cookie
 	Body    string
+	Path    string
+	Host    string
 }
 
 // ResponseConfig contains details of the HTTP response to tamper with prior to
@@ -31,28 +34,27 @@ type ResponseConfig struct {
 	Status  int
 }
 
-// HttpTampererSymptom is a plugin to mess with request/responses between
+// HTTPTampererSymptom is a plugin to mess with request/responses between
 // a consumer and provider system
-// nolint
-type HttpTampererSymptom struct {
+type HTTPTampererSymptom struct {
 	Request  RequestConfig
 	Response ResponseConfig
 }
 
 func init() {
 	plugo.PluginFactories.Register(func() (interface{}, error) {
-		return &HttpTampererSymptom{}, nil
+		return &HTTPTampererSymptom{}, nil
 	}, "http_tamperer")
 }
 
 // Setup sets up the plugin
-func (m HttpTampererSymptom) Setup() {
-	log.Debug("HTTP Error Setup()")
+func (m HTTPTampererSymptom) Setup() {
+	log.Debug("HTTP Tamperer Setup()")
 }
 
 // Teardown shuts down the plugin
-func (m HttpTampererSymptom) Teardown() {
-	log.Debug("HTTP Error Teardown()")
+func (m HTTPTampererSymptom) Teardown() {
+	log.Debug("HTTP Tamperer Teardown()")
 }
 
 // Crude implementation of an io.ReadCloser
@@ -77,7 +79,7 @@ func (r *responseBody) Read(p []byte) (int, error) {
 
 // HandleEvent is a hook to allow the plugin to intervene with a request/response
 // event
-func (m *HttpTampererSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
+func (m *HTTPTampererSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
 	case muxy.EventPreDispatch:
 		m.MuckRequest(ctx)
@@ -87,7 +89,19 @@ func (m *HttpTampererSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) 
 }
 
 // MuckRequest adds chaos to the request
-func (m *HttpTampererSymptom) MuckRequest(ctx *muxy.Context) {
+func (m *HTTPTampererSymptom) MuckRequest(ctx *muxy.Context) {
+
+	// Path
+	if m.Request.Path != "" {
+		log.Debug("HTTP Tamperer Spoofing HTTP URI from [%s] to [%s]", ctx.Request.URL.Path, log.Colorize(log.BLUE, m.Request.Path))
+		ctx.Request.URL.Path = m.Request.Path
+	}
+
+	// Host
+	if m.Request.Host != "" {
+		log.Debug("HTTP Tamperer Spoofing HTTP Host from [%s] to [%s]", ctx.Request.URL.Host, log.Colorize(log.BLUE, m.Request.Host))
+		ctx.Request.Host = m.Request.Host
+	}
 
 	// Body
 	if m.Request.Body != "" {
@@ -96,31 +110,32 @@ func (m *HttpTampererSymptom) MuckRequest(ctx *muxy.Context) {
 			log.Error(err.Error())
 		}
 		*ctx.Request = *newreq
-		log.Debug("Spoofing HTTP Request Body with %s", log.Colorize(log.BLUE, m.Request.Body))
+		log.Debug("HTTP Tamperer Spoofing HTTP Request Body With [%s]", log.Colorize(log.BLUE, m.Request.Body))
 	}
 
 	// Set Cookies
 	for _, c := range m.Request.Cookies {
 		c.Expires = stringToDate(c.RawExpires)
-		log.Debug("Spoofing Request Cookie %s => %s", log.Colorize(log.LIGHTMAGENTA, c.Name), c.String())
+		log.Debug("HTTP Tamperer Spoofing Request Cookie [%s]=> %s]", log.Colorize(log.LIGHTMAGENTA, c.Name), c.String())
 		ctx.Request.Header.Add("Cookie", c.String())
 	}
 
 	// Set Headers
 	for k, v := range m.Request.Headers {
 		key := strings.ToTitle(strings.Replace(k, "_", "-", -1))
-		log.Debug("Spoofing Request Header %s => %s", log.Colorize(log.LIGHTMAGENTA, key), v)
+		log.Debug("HTTP Tamperer Spoofing Request Header [%s => %s]", log.Colorize(log.LIGHTMAGENTA, key), v)
 		ctx.Request.Header.Set(key, v)
 	}
 
 	// This Writes all headers, setting status code - so call this last
 	if m.Request.Method != "" {
+		log.Debug("HTTP Tamperer Spoofing Request Method from [%s] to [%s]", ctx.Request.Method, log.Colorize(log.LIGHTMAGENTA, m.Request.Method))
 		ctx.Request.Method = m.Request.Method
 	}
 }
 
 // MuckResponse adds chaos to the response
-func (m *HttpTampererSymptom) MuckResponse(ctx *muxy.Context) {
+func (m *HTTPTampererSymptom) MuckResponse(ctx *muxy.Context) {
 
 	// Body
 	if m.Response.Body != "" {
@@ -141,26 +156,27 @@ func (m *HttpTampererSymptom) MuckResponse(ctx *muxy.Context) {
 			ProtoMinor:       ctx.Response.ProtoMinor,
 			Body:             cl,
 		}
-		log.Debug("Injecting HTTP Response Body with %s", log.Colorize(log.BLUE, m.Response.Body))
+		log.Debug("HTTP Tamperer Injecting HTTP Response Body with [%s]", log.Colorize(log.BLUE, m.Response.Body))
 		*ctx.Response = *r
 	}
 
 	// Set Cookies
 	for _, c := range m.Response.Cookies {
 		c.Expires = stringToDate(c.RawExpires)
-		log.Debug("Spoofing Response Cookie %s => %s", log.Colorize(log.LIGHTMAGENTA, c.Name), c.String())
+		log.Debug("HTTP Tamperer Spoofing Response Cookie [%s => %s]", log.Colorize(log.LIGHTMAGENTA, c.Name), c.String())
 		ctx.Response.Header.Add("Set-Cookie", c.String())
 	}
 
 	// Set Headers
 	for k, v := range m.Response.Headers {
 		key := strings.ToTitle(strings.Replace(k, "_", "-", -1))
-		log.Debug("Spoofing Response Header %s => %s", log.Colorize(log.LIGHTMAGENTA, key), v)
+		log.Debug("HTTP Tamperer Spoofing Response Header [%s => %s]", log.Colorize(log.LIGHTMAGENTA, key), v)
 		ctx.Response.Header.Add(key, v)
 	}
 
 	// This Writes all headers, setting status code - so call this last
 	if m.Response.Status != 0 {
+		log.Debug("HTTP Tamperer Spoofing Response Code From [%d] to [%s]", ctx.Response.StatusCode, log.Colorize(log.LIGHTMAGENTA, fmt.Sprintf("%d", m.Response.Status)))
 		ctx.Response.StatusCode = m.Response.Status
 		ctx.Response.Status = http.StatusText(m.Response.Status)
 	}
