@@ -1,5 +1,5 @@
 ## Test configuration name. Used for reporting.
-name: Network and HTTP screwer.
+name: Serve SSL and Send client certificates
 
 ## Test Description. Used for reporting
 description: Slow network to mobile levels, and add 1s delay to all messages
@@ -27,12 +27,12 @@ proxy:
       proxy_host: localhost
       proxy_port: 8080
       proxy_protocol: https
-      # proxy_ssl_key: /Users/mfellows/go/src/github.com/mefellows/muxy/ssl/client/test.key
-      # proxy_ssl_cert: /Users/mfellows/go/src/github.com/mefellows/muxy/ssl/client/test.crt
-      proxy_client_ssl_key: /Users/mfellows/.pki/certs/cert-key.pem
-      proxy_client_ssl_cert: /Users/mfellows/.pki/certs/cert.pem
-      proxy_client_ssl_ca: /Users/mfellows/.pki/ca/ca.pem
-      insecure: true # allow insecure https
+      proxy_ssl_key: proxy-server/test.key
+      proxy_ssl_cert: proxy-server/test.crt
+      proxy_client_ssl_key: client-certs/cert-key.pem
+      proxy_client_ssl_cert: client-certs/cert.pem
+      proxy_client_ssl_ca: client-certs/ca.pem
+      # insecure: true # allow insecure https
 
 ## Middleware
 ##
@@ -49,14 +49,14 @@ middleware:
   ##
   ## Useful for messing with the HTTP protocol
   ##
-  # - name: http_tamperer
-  #   config:
-  #     response:
-  #       headers:
-  #         content_length: "87"
-  #       status: 500              # Override HTTP Status code
-  #       body: |
-  #         { "status": { "code": "API-200", "message": "Success" }, "certificateValue": "faoeu" }
+  - name: http_tamperer
+    config:
+      request:
+        path:   "/nothello"
+        body:   "wow, new body!" # Override request body
+      response:
+        status: 201              # Override HTTP Status code
+        body:   "my new body"    # Override response body
 
   ## Request Logger - use this to see what's going in/out of the Proxy.
   ##
