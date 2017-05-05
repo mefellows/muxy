@@ -53,21 +53,21 @@ middleware:
   ##
   ## NOTE: This plugin requires root/sudo access to run
   #
-  - name: network_shape
-    config:
-      latency:     10         # Latency to add in ms
-      target_bw:   750        # Bandwidth in kbits/s
-      default_bw:  750
-      packet_loss: 0          # Packet loss, as a %
-      target_ports:
-        - "80"
-      target_protos:          # Target protocols
-        - "tcp"
-        - "udp"
-        - "icmp"
-      target_ips:
-      - "0.0.0.0/0"
-      device: "eth0"
+  # - name: network_shape
+  #   config:
+  #     latency:     10         # Latency to add in ms
+  #     target_bw:   750        # Bandwidth in kbits/s
+  #     default_bw:  750
+  #     packet_loss: 0          # Packet loss, as a %
+  #     target_ports:
+  #       - "80"
+  #     target_protos:          # Target protocols
+  #       - "tcp"
+  #       - "udp"
+  #       - "icmp"
+  #     target_ips:
+  #     - "0.0.0.0/0"
+  #     device: "eth0"
 
   # Enable this to fail the lot!
   # - name: http_tamperer
