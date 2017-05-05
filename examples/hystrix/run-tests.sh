@@ -6,6 +6,8 @@ function clean {
 }
 
 function build {
+  cd api; gox -osarch="linux/amd64" -output="microgo"; cd ..
+  cd backend; gox -osarch="linux/amd64" -output="microgo"; cd ..
   docker-compose build
 }
 

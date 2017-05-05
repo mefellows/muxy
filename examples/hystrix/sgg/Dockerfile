@@ -7,7 +7,11 @@ ENV     DEBIAN_FRONTEND noninteractive
 # ---------------- #
 
 # Install all prerequisites
-RUN     apt-get -y install software-properties-common
+RUN     apt-get -y install software-properties-common apt-transport-https 
+# wget
+# RUN     wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+# RUN     echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list
+# RUN     sudo apt-get update && sudo apt-get install elasticsearch
 RUN     add-apt-repository -y ppa:chris-lea/node.js
 RUN     cp /etc/apt/sources.list /etc/apt/sources.list.original &&\
         sed -i 's/archive\.ubuntu\.com\/ubuntu/mirror\.internode\.on\.net\/pub\/ubuntu\/ubuntu/1' /etc/apt/sources.list && \
@@ -21,8 +25,10 @@ RUN     pip install pytz
 RUN     npm install ini chokidar
 
 # Install Elasticsearch
-RUN     cd ~ && wget http://seek-automation-sand.s3.amazonaws.com/elk/elasticsearch/elasticsearch-1.3.2.deb
-RUN     cd ~ && dpkg -i elasticsearch-1.3.2.deb && rm elasticsearch-1.3.2.deb
+RUN      cd ~ && wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.3.2.deb
+RUN      cd ~ && dpkg -i elasticsearch-5.3.2.deb && rm elastic*.deb
+# RUN     cd ~ && wget http://seek-automation-sand.s3.amazonaws.com/elk/elasticsearch/elasticsearch-1.3.2.deb
+# RUN     cd ~ && dpkg -i elasticsearch-1.3.2.deb && rm elasticsearch-1.3.2.deb
 
 
 # Checkout the stable branches of Graphite, Carbon and Whisper and install from there
