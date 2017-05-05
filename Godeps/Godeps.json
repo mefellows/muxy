@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/mefellows/muxy",
 	"GoVersion": "go1.7",
-	"GodepVersion": "v75",
+	"GodepVersion": "v74",
 	"Deps": [
 		{
 			"ImportPath": "github.com/armon/go-radix",
@@ -59,8 +59,8 @@
 		},
 		{
 			"ImportPath": "github.com/tylertreat/comcast/throttler",
-			"Comment": "v1.0.1-6-g3552c1d",
-			"Rev": "3552c1da95e6d0d322fea023c43125231bdfb393"
+			"Comment": "v1.0.1-8-g0a7b9a1",
+			"Rev": "0a7b9a11253ff629123939177f37630052d854d4"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
