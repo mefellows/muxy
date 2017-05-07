@@ -173,17 +173,18 @@ proxy:
 
       # Specify additional proxy rules. Default catch-all proxy still
       # applies with lowest precedence.
-      # Request matchers can be specified as regular expressions
+      # Request matchers are specified as valid regular expressions
+      # and must be properly YAML escaped 
       # See https://github.com/mefellows/muxy/issues/11 for behaviour.
-      proxy_rules:
       - request:
-          method: "GET|DELETE"
-          path: "^/foo"
-          host: "*.foo\.com"
+          method: 'GET|DELETE'
+          path: '^\/foo'
+          host: '.*foo\.com'
         pass:
-          path: "/bar"
-          scheme: "http"
-          host: "bar.com
+          path: '/bar'
+          scheme: 'http'
+          host: 'bar.com'
+
 ```
 
 #### TCP Proxy
