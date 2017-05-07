@@ -6,12 +6,12 @@ import (
 	"io"
 	"net/http"
 
+	"strings"
+	"time"
+
 	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 	"github.com/mefellows/plugo/plugo"
-	//"net/http/httptest"
-	"strings"
-	"time"
 )
 
 // RequestConfig contains details of the HTTP request to tamper with prior to
