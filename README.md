@@ -169,7 +169,22 @@ proxy:
       proxy_client_ssl_ca: client-certs/ca.pem
 
       ## Enable this to proxy targets we don't trust
-      # insecure: true # allow insecure https      
+      # insecure: true # allow insecure https
+
+      # Specify additional proxy rules. Default catch-all proxy still
+      # applies with lowest matching precedence.
+      # Request matchers are specified as valid regular expressions
+      # and must be properly YAML escaped.
+      # See https://github.com/mefellows/muxy/issues/11 for behaviour.
+      - request:
+          method: 'GET|DELETE'
+          path: '^\/foo'
+          host: '.*foo\.com'
+        pass:
+          path: '/bar'
+          scheme: 'http'
+          host: 'bar.com'
+
 ```
 
 #### TCP Proxy
@@ -208,6 +223,16 @@ middleware:
     config:
       request_delay: 1000      # Delay in ms to apply to request to target
       response_delay: 500      # Delay in ms to apply to response from target
+
+      # Specify additional matching rules. Default is to apply delay to all
+      # requests on all http proxies.
+      # Request matchers are specified as valid regular expressions
+      # and must be properly YAML escaped.
+      # See https://github.com/mefellows/muxy/issues/11 for behaviour.
+      matching_rules:
+      - method: 'GET|DELETE'
+        path: '^/boo'
+        host: 'foo\.com'
 ```
 
 #### HTTP Tamperer
@@ -253,6 +278,16 @@ middleware:
               rawexpires: "Sat, 12 Sep 2015 09:19:48 UTC"
               maxage: 200
               httponly: true
+
+      # Specify additional matching rules. Default is to apply delay to all
+      # requests on all http proxies.
+      # Request matchers are specified as valid regular expressions
+      # and must be properly YAML escaped.
+      # See https://github.com/mefellows/muxy/issues/11 for behaviour.
+      matching_rules:
+      - method: 'GET|DELETE'
+        path: '^/boo'
+        host: 'foo\.com'              
 ```
 
 #### Network Shaper
