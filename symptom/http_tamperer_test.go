@@ -140,7 +140,24 @@ func TestStringToDate(t *testing.T) {
 func TestSetup(t *testing.T) {
 	tamperer := HTTPTampererSymptom{}
 	tamperer.Setup()
+
+	if len(tamperer.MatchingRules) != 1 {
+		t.Fatal("Expected default HTTPMatchingRule to be present")
+	}
+
+	tamperer = HTTPTampererSymptom{
+		MatchingRules: []HTTPMatchingRule{
+			HTTPMatchingRule{
+				Path: "/foo",
+			},
+		},
+	}
+
+	if len(tamperer.MatchingRules) != 1 && tamperer.MatchingRules[0].Path == "/foo" {
+		t.Fatal("Expected default ProxyRules not to be present")
+	}
 }
+
 func TestTeardown(t *testing.T) {
 	tamperer := HTTPTampererSymptom{}
 	tamperer.Teardown()

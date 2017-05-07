@@ -47,6 +47,12 @@ func TestMatchHTTPSymptom_Hit(t *testing.T) {
 			t.Fatal("Expected", expected, ", got", !expected)
 		}
 	}
+
+	for rule, expected := range testCases {
+		if MatchHTTPSymptoms([]HTTPMatchingRule{rule}, ctx) != expected {
+			t.Fatal("Expected", expected, ", got", !expected)
+		}
+	}
 }
 
 func TestMatchHTTPSymptom_Miss(t *testing.T) {
@@ -85,6 +91,11 @@ func TestMatchHTTPSymptom_Miss(t *testing.T) {
 
 	for rule, expected := range testCases {
 		if MatchHTTPSymptom(rule, ctx) != expected {
+			t.Fatal("Expected", expected, ", got", !expected)
+		}
+	}
+	for rule, expected := range testCases {
+		if MatchHTTPSymptoms([]HTTPMatchingRule{rule}, ctx) != expected {
 			t.Fatal("Expected", expected, ", got", !expected)
 		}
 	}

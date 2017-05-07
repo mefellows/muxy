@@ -37,8 +37,9 @@ type ResponseConfig struct {
 // HTTPTampererSymptom is a plugin to mess with request/responses between
 // a consumer and provider system
 type HTTPTampererSymptom struct {
-	Request  RequestConfig
-	Response ResponseConfig
+	Request       RequestConfig
+	Response      ResponseConfig
+	MatchingRules []HTTPMatchingRule `required:"false" mapstructure:"matching_rules"`
 }
 
 func init() {
@@ -47,13 +48,27 @@ func init() {
 	}, "http_tamperer")
 }
 
+var defaultHTTPMatchingRule = HTTPMatchingRule{
+	Path:   "/",
+	Host:   ".*",
+	Method: ".*",
+}
+
 // Setup sets up the plugin
-func (m HTTPTampererSymptom) Setup() {
+func (m *HTTPTampererSymptom) Setup() {
 	log.Debug("HTTP Tamperer Setup()")
+
+	// Add default (catch all) matching rule
+	// Only applicable if none supplied
+	if len(m.MatchingRules) == 0 {
+		m.MatchingRules = []HTTPMatchingRule{
+			defaultHTTPMatchingRule,
+		}
+	}
 }
 
 // Teardown shuts down the plugin
-func (m HTTPTampererSymptom) Teardown() {
+func (m *HTTPTampererSymptom) Teardown() {
 	log.Debug("HTTP Tamperer Teardown()")
 }
 
@@ -80,12 +95,17 @@ func (r *responseBody) Read(p []byte) (int, error) {
 // HandleEvent is a hook to allow the plugin to intervene with a request/response
 // event
 func (m *HTTPTampererSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
-	switch e {
-	case muxy.EventPreDispatch:
-
-		m.MuckRequest(ctx)
-	case muxy.EventPostDispatch:
-		m.MuckResponse(ctx)
+	fmt.Println("MatchingRules:", m.MatchingRules)
+	if MatchHTTPSymptoms(m.MatchingRules, *ctx) {
+		log.Trace("HTTP Tamperer Symptom Hit")
+		switch e {
+		case muxy.EventPreDispatch:
+			m.MuckRequest(ctx)
+		case muxy.EventPostDispatch:
+			m.MuckResponse(ctx)
+		}
+	} else {
+		log.Trace("HTTP Tamperer Symptom Miss")
 	}
 }
 

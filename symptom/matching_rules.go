@@ -3,7 +3,7 @@ package symptom
 import (
 	"regexp"
 
-	"github.com/going/toolkit/log"
+	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 )
 
@@ -17,6 +17,8 @@ type HTTPMatchingRule struct {
 // MatchHTTPSymptom takes a matching rule and a Muxy context and determines
 // if there is a match
 func MatchHTTPSymptom(rule HTTPMatchingRule, ctx muxy.Context) bool {
+	log.Trace("MatchHTTPSymptom testing rule %v", rule)
+
 	if rule.Path != "" {
 		log.Debug("HTTPMatchingRule matching path '%s' with '%s'", rule.Path, ctx.Request.URL.Path)
 		if match, _ := regexp.MatchString(rule.Path, ctx.Request.URL.Path); !match {
@@ -38,4 +40,15 @@ func MatchHTTPSymptom(rule HTTPMatchingRule, ctx muxy.Context) bool {
 		}
 	}
 	return true
+}
+
+// MatchHTTPSymptoms takes a set of matching rules and a Muxy context and determines
+// if there is a match
+var MatchHTTPSymptoms = func(rules []HTTPMatchingRule, ctx muxy.Context) bool {
+	for _, rule := range rules {
+		if MatchHTTPSymptom(rule, ctx) {
+			return true
+		}
+	}
+	return false
 }
