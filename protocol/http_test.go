@@ -12,30 +12,30 @@ func TestMatchRule_Hit(t *testing.T) {
 	proxy := HTTPProxy{}
 	defaultProxyRule := proxy.defaultProxyRule()
 	subPathProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{
+		Request: ProxyRequest{
 			Path: "/foo/",
 		},
-		ProxyPass: ProxyPass{},
+		Pass: ProxyPass{},
 	}
 	hostProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{
+		Request: ProxyRequest{
 			Host: "foo\\.com",
 		},
-		ProxyPass: ProxyPass{},
+		Pass: ProxyPass{},
 	}
 	methodProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{
+		Request: ProxyRequest{
 			Method: "(?i)get",
 		},
-		ProxyPass: ProxyPass{},
+		Pass: ProxyPass{},
 	}
 	allProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{
+		Request: ProxyRequest{
 			Path:   "/foo/bar",
 			Host:   ".*foo.*",
 			Method: "(?i)get",
 		},
-		ProxyPass: ProxyPass{},
+		Pass: ProxyPass{},
 	}
 
 	defaultRequest := http.Request{
@@ -64,30 +64,30 @@ func TestMatchRule_Hit(t *testing.T) {
 
 func TestMatchRule_Miss(t *testing.T) {
 	subPathProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{
+		Request: ProxyRequest{
 			Path: "^/bar",
 		},
-		ProxyPass: ProxyPass{},
+		Pass: ProxyPass{},
 	}
 	hostProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{
+		Request: ProxyRequest{
 			Host: "bar\\.com",
 		},
-		ProxyPass: ProxyPass{},
+		Pass: ProxyPass{},
 	}
 	methodProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{
+		Request: ProxyRequest{
 			Method: "(?i)post",
 		},
-		ProxyPass: ProxyPass{},
+		Pass: ProxyPass{},
 	}
 	allProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{
+		Request: ProxyRequest{
 			Path:   "^/baz",
 			Host:   ".*bar.*",
 			Method: "(?i)post",
 		},
-		ProxyPass: ProxyPass{},
+		Pass: ProxyPass{},
 	}
 
 	defaultRequest := http.Request{
@@ -116,8 +116,8 @@ func TestMatchRule_Miss(t *testing.T) {
 func TestApplyProxyPassRule_Path(t *testing.T) {
 	proxy := HTTPProxy{}
 	subPathProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{},
-		ProxyPass: ProxyPass{
+		Request: ProxyRequest{},
+		Pass: ProxyPass{
 			Path: "/newstart",
 		},
 	}
@@ -135,8 +135,8 @@ func TestApplyProxyPassRule_Path(t *testing.T) {
 		t.Fatal("Expected URL to be translated to /newstart/foo/bar but got", defaultRequest.URL.Path)
 	}
 	rootProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{},
-		ProxyPass:    ProxyPass{},
+		Request: ProxyRequest{},
+		Pass:    ProxyPass{},
 	}
 	defaultRequest = &http.Request{
 		URL: &url.URL{
@@ -156,8 +156,8 @@ func TestApplyProxyPassRule_Path(t *testing.T) {
 func TestApplyProxyPassRule_Method(t *testing.T) {
 	proxy := HTTPProxy{}
 	hostProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{},
-		ProxyPass: ProxyPass{
+		Request: ProxyRequest{},
+		Pass: ProxyPass{
 			Method: "POST",
 		},
 	}
@@ -179,8 +179,8 @@ func TestApplyProxyPassRule_Method(t *testing.T) {
 func TestApplyProxyPassRule_Scheme(t *testing.T) {
 	proxy := HTTPProxy{}
 	schemeProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{},
-		ProxyPass: ProxyPass{
+		Request: ProxyRequest{},
+		Pass: ProxyPass{
 			Scheme: "http",
 		},
 	}
@@ -202,8 +202,8 @@ func TestApplyProxyPassRule_Scheme(t *testing.T) {
 func TestApplyProxyPassRule_Host(t *testing.T) {
 	proxy := HTTPProxy{}
 	hostProxyRule := ProxyRule{
-		ProxyRequest: ProxyRequest{},
-		ProxyPass: ProxyPass{
+		Request: ProxyRequest{},
+		Pass: ProxyPass{
 			Host: "bar.com",
 		},
 	}
@@ -250,7 +250,7 @@ func TestDefaultProxyRule(t *testing.T) {
 	rule := proxy.defaultProxyRule()
 
 	expected := "foo.com:1234"
-	if rule.ProxyPass.Host != expected {
-		t.Fatal("Expected host to be", expected, "but got", rule.ProxyPass.Host)
+	if rule.Pass.Host != expected {
+		t.Fatal("Expected host to be", expected, "but got", rule.Pass.Host)
 	}
 }
