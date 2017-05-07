@@ -169,7 +169,21 @@ proxy:
       proxy_client_ssl_ca: client-certs/ca.pem
 
       ## Enable this to proxy targets we don't trust
-      # insecure: true # allow insecure https      
+      # insecure: true # allow insecure https
+
+      # Specify additional proxy rules. Default catch-all proxy still
+      # applies with lowest precedence.
+      # Request matchers can be specified as regular expressions
+      # See https://github.com/mefellows/muxy/issues/11 for behaviour.
+      proxy_rules:
+      - request:
+          method: "GET|DELETE"
+          path: "^/foo"
+          host: "*.foo\.com"
+        pass:
+          path: "/bar"
+          scheme: "http"
+          host: "bar.com
 ```
 
 #### TCP Proxy
