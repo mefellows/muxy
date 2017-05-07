@@ -82,6 +82,7 @@ func (r *responseBody) Read(p []byte) (int, error) {
 func (m *HTTPTampererSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
 	case muxy.EventPreDispatch:
+
 		m.MuckRequest(ctx)
 	case muxy.EventPostDispatch:
 		m.MuckResponse(ctx)
@@ -101,6 +102,7 @@ func (m *HTTPTampererSymptom) MuckRequest(ctx *muxy.Context) {
 	if m.Request.Host != "" {
 		log.Debug("HTTP Tamperer Spoofing HTTP Host from [%s] to [%s]", ctx.Request.URL.Host, log.Colorize(log.BLUE, m.Request.Host))
 		ctx.Request.Host = m.Request.Host
+		ctx.Request.URL.Host = m.Request.Host
 	}
 
 	// Body

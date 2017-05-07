@@ -20,20 +20,16 @@ import (
 // to determine if the proxy rule should fire
 type ProxyRequest struct {
 	Method string
-	// Headers map[string]string
-	// Cookies []http.Cookie
-	Path string
-	Host string
+	Path   string
+	Host   string
 }
 
 // ProxyPass contains details of the HTTP request to
 // send to the downstream proxy target
 type ProxyPass struct {
 	Method string
-	// Headers map[string]string
-	// Cookies []http.Cookie
-	Path string
-	Host string
+	Path   string
+	Host   string
 
 	// Scheme is one of http or https
 	Scheme string
@@ -227,8 +223,8 @@ func MatchRule(rule ProxyRule, req http.Request) bool {
 	}
 
 	if rule.Request.Host != "" {
-		log.Debug("ProxyRule matching host '%s' with '%s'", rule.Request.Host, req.URL.Host)
-		if match, _ := regexp.MatchString(rule.Request.Host, req.URL.Host); !match {
+		log.Debug("ProxyRule matching host '%s' with '%s'", rule.Request.Host, req.Host)
+		if match, _ := regexp.MatchString(rule.Request.Host, req.Host); !match {
 			return false
 		}
 	}

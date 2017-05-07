@@ -41,9 +41,9 @@ func TestMatchRule_Hit(t *testing.T) {
 	defaultRequest := http.Request{
 		URL: &url.URL{
 			Path:   "/foo/bar",
-			Host:   "foo.com",
 			Scheme: "https",
 		},
+		Host:   "foo.com",
 		Method: "GET",
 	}
 
@@ -91,9 +91,9 @@ func TestMatchRule_Miss(t *testing.T) {
 	}
 
 	defaultRequest := http.Request{
+		Host: "foo.com",
 		URL: &url.URL{
 			Path:   "/foo/bar",
-			Host:   "foo.com",
 			Scheme: "https",
 		},
 		Method: "GET",
