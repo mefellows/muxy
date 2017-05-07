@@ -1,4 +1,4 @@
-# Contributing to Pact go
+# Contributing to Muxy
 
 1. Fork it
 1. Create your feature branch (git checkout -b my-new-feature)
@@ -22,5 +22,5 @@ npm i -g cz-conventional-changelog
 
 ### Vendoring
 
-We use [Godep](https://github.com/tools/fodep) to vendor packages. Please ensure
+We use [Godep](https://github.com/tools/godep) to vendor packages. Please ensure
 any new packages are added to vendor prior to patching.
