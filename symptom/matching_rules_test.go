@@ -1,14 +1,18 @@
 package symptom
 
 import (
+	"fmt"
+	"math"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/mefellows/muxy/muxy"
 )
 
-func TestMatchHTTPSymptom_Hit(t *testing.T) {
+func TestMatchSymptom_Hit(t *testing.T) {
 	ctx := muxy.Context{
 		Request: &http.Request{
 			URL: &url.URL{
@@ -20,42 +24,42 @@ func TestMatchHTTPSymptom_Hit(t *testing.T) {
 			Method: "GET",
 		},
 	}
-	subPathHTTPMatchingRule := HTTPMatchingRule{
+	subPathMatchingRule := MatchingRule{
 		Path: "/foo/",
 	}
-	hostHTTPMatchingRule := HTTPMatchingRule{
+	hostMatchingRule := MatchingRule{
 		Host: "foo\\.com",
 	}
-	methodHTTPMatchingRule := HTTPMatchingRule{
+	methodMatchingRule := MatchingRule{
 		Method: "(?i)get",
 	}
-	allHTTPMatchingRule := HTTPMatchingRule{
+	allMatchingRule := MatchingRule{
 		Path:   "/foo/bar",
 		Host:   ".*foo.*",
 		Method: "(?i)get",
 	}
 
-	testCases := map[HTTPMatchingRule]bool{
-		subPathHTTPMatchingRule: true,
-		hostHTTPMatchingRule:    true,
-		methodHTTPMatchingRule:  true,
-		allHTTPMatchingRule:     true,
+	testCases := map[MatchingRule]bool{
+		subPathMatchingRule: true,
+		hostMatchingRule:    true,
+		methodMatchingRule:  true,
+		allMatchingRule:     true,
 	}
 
 	for rule, expected := range testCases {
-		if MatchHTTPSymptom(rule, ctx) != expected {
+		if MatchSymptom(rule, ctx) != expected {
 			t.Fatal("Expected", expected, ", got", !expected)
 		}
 	}
 
 	for rule, expected := range testCases {
-		if MatchHTTPSymptoms([]HTTPMatchingRule{rule}, ctx) != expected {
+		if MatchSymptoms([]MatchingRule{rule}, ctx) != expected {
 			t.Fatal("Expected", expected, ", got", !expected)
 		}
 	}
 }
 
-func TestMatchHTTPSymptom_Miss(t *testing.T) {
+func TestMatchSymptom_Miss(t *testing.T) {
 	ctx := muxy.Context{
 		Request: &http.Request{
 			URL: &url.URL{
@@ -67,36 +71,43 @@ func TestMatchHTTPSymptom_Miss(t *testing.T) {
 			Method: "GET",
 		},
 	}
-	subPathHTTPMatchingRule := HTTPMatchingRule{
+	subPathMatchingRule := MatchingRule{
 		Path: "^/bar",
 	}
-	hostHTTPMatchingRule := HTTPMatchingRule{
+	hostMatchingRule := MatchingRule{
 		Host: "bar\\.com",
 	}
-	methodHTTPMatchingRule := HTTPMatchingRule{
+	methodMatchingRule := MatchingRule{
 		Method: "(?i)post",
 	}
-	allHTTPMatchingRule := HTTPMatchingRule{
+	allMatchingRule := MatchingRule{
 		Path:   "^/baz",
 		Host:   ".*bar.*",
 		Method: "(?i)post",
 	}
 
-	testCases := map[HTTPMatchingRule]bool{
-		subPathHTTPMatchingRule: false,
-		hostHTTPMatchingRule:    false,
-		methodHTTPMatchingRule:  false,
-		allHTTPMatchingRule:     false,
+	testCases := map[MatchingRule]bool{
+		subPathMatchingRule: false,
+		hostMatchingRule:    false,
+		methodMatchingRule:  false,
+		allMatchingRule:     false,
 	}
 
 	for rule, expected := range testCases {
-		if MatchHTTPSymptom(rule, ctx) != expected {
+		if MatchSymptom(rule, ctx) != expected {
 			t.Fatal("Expected", expected, ", got", !expected)
 		}
 	}
 	for rule, expected := range testCases {
-		if MatchHTTPSymptoms([]HTTPMatchingRule{rule}, ctx) != expected {
+		if MatchSymptoms([]MatchingRule{rule}, ctx) != expected {
 			t.Fatal("Expected", expected, ", got", !expected)
 		}
 	}
+}
+
+func TestProbability(t *testing.T) {
+	rand.Seed(time.Now().Unix())
+	likelihood := rand.Intn(100)
+	fmt.Println(likelihood)
+	fmt.Println(int(math.Min(65, 100)))
 }

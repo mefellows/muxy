@@ -50,9 +50,11 @@ middleware:
         randomize: true             # Replaces input mesage with a random string
         truncate: true              # Removes last character from the request message
       response:
-        body: "wow, new response!" # Override response body
+        body: "wow, new response!"  # Override response body
         randomize: true             # Replaces response mesage with a random string
         truncate: true              # Removes last character from the response message
+      matching_rules:
+        - probability: 50           # Probability tamperer will fire
 
   ## Request Logger - use this to see what's going in/out of the Proxy.
   ##

@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/mefellows/muxy/command"
 	_ "github.com/mefellows/muxy/middleware"
@@ -17,6 +19,7 @@ func main() {
 }
 
 func realMain() int {
+	rand.Seed(time.Now().Unix())
 	cli := cli.NewCLI(strings.ToLower(ApplicationName), Version)
 	cli.Args = os.Args[1:]
 	cli.Commands = command.Commands

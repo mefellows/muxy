@@ -19,12 +19,12 @@ func TestHTTPDelay_Muck(t *testing.T) {
 }
 
 func TestHTTPDelayHandleEvent_Hit(t *testing.T) {
-	oldMatchHTTPSymptoms := MatchHTTPSymptoms
-	MatchHTTPSymptoms = func(rules []HTTPMatchingRule, ctx muxy.Context) bool {
+	oldMatchSymptoms := MatchSymptoms
+	MatchSymptoms = func(rules []MatchingRule, ctx muxy.Context) bool {
 		return true
 	}
 	defer func() {
-		MatchHTTPSymptoms = oldMatchHTTPSymptoms
+		MatchSymptoms = oldMatchSymptoms
 	}()
 
 	ctx := &muxy.Context{}
@@ -40,12 +40,12 @@ func TestHTTPDelayHandleEvent_Hit(t *testing.T) {
 }
 
 func TestHTTPDelayHandleEvent_Miss(t *testing.T) {
-	oldMatchHTTPSymptoms := MatchHTTPSymptoms
-	MatchHTTPSymptoms = func(rules []HTTPMatchingRule, ctx muxy.Context) bool {
+	oldMatchSymptoms := MatchSymptoms
+	MatchSymptoms = func(rules []MatchingRule, ctx muxy.Context) bool {
 		return false
 	}
 	defer func() {
-		MatchHTTPSymptoms = oldMatchHTTPSymptoms
+		MatchSymptoms = oldMatchSymptoms
 	}()
 
 	ctx := &muxy.Context{}
@@ -58,12 +58,12 @@ func TestHTTPDelay_Setup(t *testing.T) {
 	delay.Setup()
 
 	if len(delay.MatchingRules) != 1 {
-		t.Fatal("Expected default HTTPMatchingRule to be present")
+		t.Fatal("Expected default MatchingRule to be present")
 	}
 
 	delay = HTTPDelaySymptom{
-		MatchingRules: []HTTPMatchingRule{
-			HTTPMatchingRule{
+		MatchingRules: []MatchingRule{
+			MatchingRule{
 				Path: "/foo",
 			},
 		},

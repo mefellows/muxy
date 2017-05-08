@@ -38,8 +38,9 @@ type TCPResponseConfig struct {
 // TCPTampererSymptom is a plugin to mess with request/responses between
 // a consumer and provider system
 type TCPTampererSymptom struct {
-	Request  TCPRequestConfig
-	Response TCPResponseConfig
+	Request       TCPRequestConfig
+	Response      TCPResponseConfig
+	MatchingRules []MatchingRule `required:"false" mapstructure:"matching_rules"`
 }
 
 func init() {
@@ -51,6 +52,14 @@ func init() {
 // Setup sets up the plugin
 func (m TCPTampererSymptom) Setup() {
 	log.Debug("TCP Tamperer Setup()")
+
+	// Add default (catch all) matching rule
+	// Only applicable if none supplied
+	if len(m.MatchingRules) == 0 {
+		m.MatchingRules = []MatchingRule{
+			defaultMatchingRule,
+		}
+	}
 }
 
 // Teardown shuts down the plugin
@@ -61,14 +70,19 @@ func (m TCPTampererSymptom) Teardown() {
 // HandleEvent is a hook to allow the plugin to intervene with a request/response
 // event
 func (m *TCPTampererSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
-	log.Trace("TCP Tamperer - Handle Event")
-	switch e {
-	case muxy.EventPreDispatch:
-		log.Debug("TCP Tamperer - Handle Event - pre dispatch")
-		m.MuckRequest(ctx)
-	case muxy.EventPostDispatch:
-		log.Debug("TCP Tamperer - Handle Event - post dispatch")
-		m.MuckResponse(ctx)
+	if MatchSymptoms(m.MatchingRules, *ctx) {
+		log.Trace("TCP Delay Tamperer Hit")
+
+		switch e {
+		case muxy.EventPreDispatch:
+			log.Debug("TCP Tamperer - Handle Event - pre dispatch")
+			m.MuckRequest(ctx)
+		case muxy.EventPostDispatch:
+			log.Debug("TCP Tamperer - Handle Event - post dispatch")
+			m.MuckResponse(ctx)
+		}
+	} else {
+		log.Trace("TCP Delay Tamperer Miss")
 	}
 }
 
