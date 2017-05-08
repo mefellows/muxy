@@ -1,52 +1,72 @@
 package symptom
 
 import (
+	"math"
 	"regexp"
+
+	"math/rand"
 
 	"github.com/mefellows/muxy/log"
 	"github.com/mefellows/muxy/muxy"
 )
 
-// HTTPMatchingRule describes the fields to match on an HTTP request
-type HTTPMatchingRule struct {
-	Method string
-	Path   string
-	Host   string
+// MatchingRule describes the fields to match on an HTTP request
+type MatchingRule struct {
+	Method      string
+	Path        string
+	Host        string
+	Probability float64
 }
 
-// MatchHTTPSymptom takes a matching rule and a Muxy context and determines
+// MatchSymptom takes a matching rule and a Muxy context and determines
 // if there is a match
-func MatchHTTPSymptom(rule HTTPMatchingRule, ctx muxy.Context) bool {
-	log.Trace("MatchHTTPSymptom testing rule %v", rule)
+func MatchSymptom(rule MatchingRule, ctx muxy.Context) bool {
+	log.Trace("MatchSymptom testing rule %v", rule)
 
-	if rule.Path != "" {
-		log.Debug("HTTPMatchingRule matching path '%s' with '%s'", rule.Path, ctx.Request.URL.Path)
-		if match, _ := regexp.MatchString(rule.Path, ctx.Request.URL.Path); !match {
+	// HTTP only matching
+	// TODO: Rules should be abstracted better so that we can pass them around
+	//       without awareness of individual protocols, like TCP or HTTP
+	if ctx.Request != nil {
+
+		if rule.Path != "" {
+			log.Debug("MatchingRule matching path '%s' with '%s'", rule.Path, ctx.Request.URL.Path)
+			if match, _ := regexp.MatchString(rule.Path, ctx.Request.URL.Path); !match {
+				return false
+			}
+		}
+
+		if rule.Host != "" {
+			log.Debug("MatchingRule matching host '%s' with '%s'", rule.Host, ctx.Request.Host)
+			if match, _ := regexp.MatchString(rule.Host, ctx.Request.Host); !match {
+				return false
+			}
+		}
+
+		if rule.Method != "" {
+			log.Debug("MatchingRule matching method '%s' with '%s'", rule.Method, ctx.Request.Method)
+			if match, _ := regexp.MatchString(rule.Method, ctx.Request.Method); !match {
+				return false
+			}
+		}
+	}
+
+	// All protocols
+	if rule.Probability > 0 {
+		random := rand.Intn(100)
+		log.Debug("MatchingRule assessing probability %.2f against computed %d", rule.Probability, random)
+		if random > int(math.Min(rule.Probability, 100)) {
 			return false
 		}
 	}
 
-	if rule.Host != "" {
-		log.Debug("HTTPMatchingRule matching host '%s' with '%s'", rule.Host, ctx.Request.Host)
-		if match, _ := regexp.MatchString(rule.Host, ctx.Request.Host); !match {
-			return false
-		}
-	}
-
-	if rule.Method != "" {
-		log.Debug("HTTPMatchingRule matching method '%s' with '%s'", rule.Method, ctx.Request.Method)
-		if match, _ := regexp.MatchString(rule.Method, ctx.Request.Method); !match {
-			return false
-		}
-	}
 	return true
 }
 
-// MatchHTTPSymptoms takes a set of matching rules and a Muxy context and determines
+// MatchSymptoms takes a set of matching rules and a Muxy context and determines
 // if there is a match
-var MatchHTTPSymptoms = func(rules []HTTPMatchingRule, ctx muxy.Context) bool {
+var MatchSymptoms = func(rules []MatchingRule, ctx muxy.Context) bool {
 	for _, rule := range rules {
-		if MatchHTTPSymptom(rule, ctx) {
+		if MatchSymptom(rule, ctx) {
 			return true
 		}
 	}

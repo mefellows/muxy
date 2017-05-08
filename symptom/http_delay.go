@@ -11,10 +11,10 @@ import (
 // HTTPDelaySymptom adds specified delays to requests Symptom
 // Update docs: these values should be in ms
 type HTTPDelaySymptom struct {
-	RequestDelay  int                `required:"false" mapstructure:"request_delay"`
-	ResponseDelay int                `required:"false" mapstructure:"response_delay"`
-	Delay         int                `required:"false" mapstructure:"delay"`
-	MatchingRules []HTTPMatchingRule `required:"false" mapstructure:"matching_rules"`
+	RequestDelay  int            `required:"false" mapstructure:"request_delay"`
+	ResponseDelay int            `required:"false" mapstructure:"response_delay"`
+	Delay         int            `required:"false" mapstructure:"delay"`
+	MatchingRules []MatchingRule `required:"false" mapstructure:"matching_rules"`
 }
 
 var oneSecondInMillis = 1000
@@ -35,8 +35,8 @@ func (m *HTTPDelaySymptom) Setup() {
 	// Add default (catch all) matching rule
 	// Only applicable if none supplied
 	if len(m.MatchingRules) == 0 {
-		m.MatchingRules = []HTTPMatchingRule{
-			defaultHTTPMatchingRule,
+		m.MatchingRules = []MatchingRule{
+			defaultMatchingRule,
 		}
 	}
 }
@@ -48,7 +48,7 @@ func (m *HTTPDelaySymptom) Teardown() {
 
 // HandleEvent takes a proxy event for the proxy to intercept and modify
 func (m *HTTPDelaySymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
-	if MatchHTTPSymptoms(m.MatchingRules, *ctx) {
+	if MatchSymptoms(m.MatchingRules, *ctx) {
 		log.Trace("HTTP Delay Tamperer Hit")
 
 		switch e {

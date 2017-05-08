@@ -142,12 +142,12 @@ func TestSetup(t *testing.T) {
 	tamperer.Setup()
 
 	if len(tamperer.MatchingRules) != 1 {
-		t.Fatal("Expected default HTTPMatchingRule to be present")
+		t.Fatal("Expected default MatchingRule to be present")
 	}
 
 	tamperer = HTTPTampererSymptom{
-		MatchingRules: []HTTPMatchingRule{
-			HTTPMatchingRule{
+		MatchingRules: []MatchingRule{
+			MatchingRule{
 				Path: "/foo",
 			},
 		},
