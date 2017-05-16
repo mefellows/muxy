@@ -1,4 +1,4 @@
-<h1><img src="https://cloud.githubusercontent.com/assets/53900/26097013/7c930660-3a66-11e7-9b5c-780b0630d5a4.gif" alt="Muxy Logo" style="height: 80px;" height="80px"/><h1>
+<img src="https://cloud.githubusercontent.com/assets/53900/26097013/7c930660-3a66-11e7-9b5c-780b0630d5a4.gif" alt="Muxy Logo" style="height: 80px;" height="80px"/>
 
 Proxy for simulating real-world distributed system failures to improve resilience in your applications.
 
