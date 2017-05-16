@@ -4,6 +4,9 @@
 Proxy for simulating real-world distributed system failures to improve resilience in your applications.
 
 [![wercker status](https://app.wercker.com/status/e45703ebafd48632db56f022cc54546b/s "wercker status")](https://app.wercker.com/project/bykey/e45703ebafd48632db56f022cc54546b)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mefellows/muxy)](https://goreportcard.com/report/github.com/mefellows/muxy)
+[![GoDoc](https://godoc.org/github.com/mefellows/muxy?status.svg)](https://godoc.org/github.com/mefellows/muxy)
+[![Coverage Status](https://coveralls.io/repos/github/mefellows/muxy/badge.svg?branch=HEAD)](https://coveralls.io/github/pact-foundation/pact-go?branch=HEAD)
 
 ## Introduction
 
