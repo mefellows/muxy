@@ -1,3 +1,5 @@
+// Package log contains a wrapper of the 'log' package with
+// command utility functions, includig colourised output.
 package log
 
 import (
@@ -22,6 +24,7 @@ const (
 	WARN
 	ERROR
 	FATAL
+	NONE
 )
 
 // nolint

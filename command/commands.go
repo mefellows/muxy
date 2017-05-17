@@ -1,3 +1,4 @@
+// Package command contains the CLI options for Muxy.
 package command
 
 import (

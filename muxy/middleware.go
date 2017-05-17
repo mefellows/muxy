@@ -15,16 +15,21 @@ const (
 // Middleware's are executed in stacked order before or after a Middleware,
 // and are perfect for jobs like instrumentation. They are given a read/write copy
 // of the runtime context and are executed synchronously.
-type Middleware interface {
-	Setup()
-	HandleEvent(event ProxyEvent, ctx *Context)
-	Teardown()
-}
-
-// Register with plugin factory:
 //
-//func init() {
-//  muxy.PluginFactories.Register(NewMiddlewarex, "sypmtomname")
-//}
+// Middleware's are registered via a plugin factory e.g.
+//
+//    func init() {
+//      muxy.PluginFactories.Register(NewMiddlewarex, "sypmtomname")
+//    }
 //
 // Where NewMiddlewarex is a func that returns a interface{} (Middleware) when called
+type Middleware interface {
+	// Setup is called when the plugin is registered
+	Setup()
+
+	// HandleEvent takes a ProxyEvent and acts on the information provided
+	HandleEvent(event ProxyEvent, ctx *Context)
+
+	// Teardown is used to cleanup any resources on plugin destray
+	Teardown()
+}

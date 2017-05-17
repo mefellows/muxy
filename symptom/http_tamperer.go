@@ -1,3 +1,5 @@
+// Package symptom contains the default muxy.Symptom implementations:
+// HTTP Delay, HTTP Tamperer, Network Shape and the TCP Tamperer.
 package symptom
 
 import (

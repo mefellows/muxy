@@ -1,3 +1,8 @@
+// Package protocol contains all of the available protocols:
+// TCP, HTTP and the HTTP reverse proxy component.
+//
+// All protocols support plugins (e.g. Middlewares and Symptoms)
+// to interfere with their behaviour.
 package protocol
 
 import (

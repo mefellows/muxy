@@ -47,6 +47,38 @@ func TestLogLevel(t *testing.T) {
 		t.Fatalf("Logger should have written once, received %d calls", writer.Count)
 	}
 }
+
+func TestLog_Level(t *testing.T) {
+	levels := []Level{
+		TRACE,
+		INFO,
+		WARN,
+		ERROR,
+		FATAL,
+	}
+	logger := MuxyLogger{Level: NONE}
+
+	for _, level := range levels {
+		logger.SetLevel(level)
+		logger.Trace("Test_LogLevel - Trace")
+		logger.Debug("Test_LogLevel - Debug")
+		logger.Info("Test_LogLevel - Info")
+		logger.Warn("Test_LogLevel - Warn")
+		logger.Error("Test_LogLevel - Error")
+		logger.Log(level, "TestLog_Level")
+	}
+}
+
+func TestLog_Functions(t *testing.T) {
+	SetLevel(NONE)
+	Trace("TestLog_Functions - Trace")
+	Debug("TestLog_Functions - Debug")
+	Info("TestLog_Functions - Info")
+	Warn("TestLog_Functions - Warn")
+	Error("TestLog_Functions - Error")
+	Log(ERROR, "TestLog_Functions - ERROR")
+}
+
 func TestLogColour(t *testing.T) {
 	logger := &MuxyLogger{Level: DEBUG}
 	logger.Log(INFO, "Info %s", Colorize(LIGHTRED, " some words "))

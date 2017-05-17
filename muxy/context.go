@@ -6,8 +6,19 @@ import (
 
 // Context is the request context given to Middlewares and Symptoms.
 type Context struct {
-	Request        *http.Request
-	Response       *http.Response
+	// Request contains a reference to the HTTP Request
+	// if it's an HTTP proxied event.
+	// It may be mutated by prior and future middlewares/plugins
+	Request *http.Request
+
+	// Response contains a reference to the HTTP Response
+	// if it's an HTTP proxied event.
+	// It may be mutated by prior and future middlewares/plugins
+	Response *http.Response
+
+	// ResponseWriter for the current HTTP session if it exists.
 	ResponseWriter http.ResponseWriter
-	Bytes          []byte
+
+	// Bytes contains the current message for TCP sessions.
+	Bytes []byte
 }

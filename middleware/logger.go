@@ -1,3 +1,4 @@
+// Package middleware contains default middleware implementations.
 package middleware
 
 import (
