@@ -15,9 +15,9 @@ import (
 	"github.com/tylertreat/comcast/throttler"
 )
 
-// ShittyNetworkSymptom allows you to modify the network speed on a host
+// NetworkShaperSymptom allows you to modify the network speed on a host
 // e.g. shape bandwidth to mobile, slower speeds
-type ShittyNetworkSymptom struct {
+type NetworkShaperSymptom struct {
 	config           throttler.Config
 	Device           string
 	Latency          int      `default:"-1"`
@@ -34,14 +34,14 @@ type ShittyNetworkSymptom struct {
 
 func init() {
 	plugo.PluginFactories.Register(func() (interface{}, error) {
-		return &ShittyNetworkSymptom{}, nil
+		return &NetworkShaperSymptom{}, nil
 	}, "network_shape")
 
 }
 
 // Setup sets up the plugin
-func (s *ShittyNetworkSymptom) Setup() {
-	log.Debug("ShittyNetworkSymptom - Setup()")
+func (s *NetworkShaperSymptom) Setup() {
+	log.Debug("NetworkShaperSymptom - Setup()")
 
 	ports := parsePorts(strings.Join(s.TargetPorts, ","))
 	targetIPv4, targetIPv6 := parseAddrs(strings.Join(append(s.TargetIps, s.TargetIps6...), ","))
@@ -59,14 +59,17 @@ func (s *ShittyNetworkSymptom) Setup() {
 		DryRun:           false,
 	}
 
-	supressOutput(func() {
-		throttler.Run(&s.config)
-	})
+	executeThrottler(&s.config)
+}
 
+var executeThrottler = func(config *throttler.Config) {
+	supressOutput(func() {
+		throttler.Run(config)
+	})
 }
 
 // HandleEvent is the hook into the event system
-func (s ShittyNetworkSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
+func (s NetworkShaperSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
 	switch e {
 	case muxy.EventPreDispatch:
 		s.Muck(ctx)
@@ -74,17 +77,15 @@ func (s ShittyNetworkSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) 
 }
 
 // Muck is where the plugin can do any context-specific chaos
-func (s *ShittyNetworkSymptom) Muck(ctx *muxy.Context) {
-	log.Debug("ShittyNetworkSymptom - Mucking...")
+func (s *NetworkShaperSymptom) Muck(ctx *muxy.Context) {
+	log.Debug("NetworkShaperSymptom - Mucking...")
 }
 
 // Teardown shuts down the plugin
-func (s *ShittyNetworkSymptom) Teardown() {
-	log.Debug("ShittyNetworkSymptom - Teardown()")
+func (s *NetworkShaperSymptom) Teardown() {
+	log.Debug("NetworkShaperSymptom - Teardown()")
 	s.config.Stop = true
-	supressOutput(func() {
-		throttler.Run(&s.config)
-	})
+	executeThrottler(&s.config)
 }
 
 // Supress output of function to keep logs clean
@@ -118,19 +119,20 @@ func supressOutput(f func()) {
 }
 
 func parseLoss(loss string) float64 {
+	loss = strings.TrimSpace(loss)
 	val := loss
 	if strings.Contains(loss, "%") {
 		val = loss[:len(loss)-1]
 	}
 	l, err := strconv.ParseFloat(val, 64)
 	if err != nil {
-		log.Fatal("ShittyNetworkSymptom - Incorrectly specified packet loss:", loss)
+		fail("NetworkShaperSymptom - Incorrectly specified packet loss:", loss)
 	}
 	return l
 }
 
 func parseAddrs(addrs string) ([]string, []string) {
-	adrs := strings.Split(addrs, ",")
+	adrs := strings.Split(strings.TrimSpace(addrs), ",")
 	parsedIPv4 := []string{}
 	parsedIPv6 := []string{}
 
@@ -152,13 +154,27 @@ func parseAddrs(addrs string) ([]string, []string) {
 						parsedIPv6 = append(parsedIPv6, net.String())
 					}
 				} else {
-					log.Fatal("ShittyNetworkSymptom - Incorrectly specified target IP or CIDR:", adr)
+					fail("NetworkShaperSymptom - Incorrectly specified target IP or CIDR:", adr)
 				}
 			}
 		}
 	}
 
 	return parsedIPv4, parsedIPv6
+}
+
+func parsePort(port string) int {
+	prt, err := strconv.Atoi(strings.TrimSpace(port))
+	if err != nil {
+		return 0
+	}
+
+	return prt
+}
+
+func validPort(port string) bool {
+	prt := parsePort(port)
+	return prt > 0 && prt < 65536
 }
 
 func parsePorts(ports string) []string {
@@ -171,33 +187,19 @@ func parsePorts(ports string) []string {
 				if validRange(prt) {
 					parsed = append(parsed, prt)
 				} else {
-					log.Fatal("ShittyNetworkSymptom - Incorrectly specified port range:", prt)
+					fail("NetworkShaperSymptom - Incorrectly specified port range:", prt)
 				}
 			} else { //Isn't a range, check if just a single port
 				if validPort(prt) {
 					parsed = append(parsed, prt)
 				} else {
-					log.Fatal("ShittyNetworkSymptom - Incorrectly specified port:", prt)
+					fail("NetworkShaperSymptom - Incorrectly specified port:", prt)
 				}
 			}
 		}
 	}
 
 	return parsed
-}
-
-func parsePort(port string) int {
-	prt, err := strconv.Atoi(port)
-	if err != nil {
-		return 0
-	}
-
-	return prt
-}
-
-func validPort(port string) bool {
-	prt := parsePort(port)
-	return prt > 0 && prt < 65536
 }
 
 func validRange(ports string) bool {
@@ -237,10 +239,14 @@ func parseProtos(protos string) []string {
 				p == "icmp" {
 				parsed = append(parsed, p)
 			} else {
-				log.Fatal("ShittyNetworkSymptom - Incorrectly specified protocol:", p)
+				fail("NetworkShaperSymptom - Incorrectly specified protocol:", p)
 			}
 		}
 	}
 
 	return parsed
+}
+
+var fail = func(reason string, i ...interface{}) {
+	log.Fatalf(reason, i)
 }

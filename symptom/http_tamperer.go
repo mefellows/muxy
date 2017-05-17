@@ -5,7 +5,7 @@ package symptom
 import (
 	"bytes"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 
 	"strings"
@@ -74,30 +74,9 @@ func (m *HTTPTampererSymptom) Teardown() {
 	log.Debug("HTTP Tamperer Teardown()")
 }
 
-// Crude implementation of an io.ReadCloser
-type responseBody struct {
-	body   []byte
-	closed bool
-}
-
-func (r *responseBody) Close() error {
-	r.closed = true
-	return nil
-}
-
-func (r *responseBody) Read(p []byte) (int, error) {
-	if r.closed {
-		return 0, io.EOF
-	}
-	copy(p, r.body)
-	r.closed = true
-	return len(r.body), nil
-}
-
 // HandleEvent is a hook to allow the plugin to intervene with a request/response
 // event
 func (m *HTTPTampererSymptom) HandleEvent(e muxy.ProxyEvent, ctx *muxy.Context) {
-	fmt.Println("MatchingRules:", m.MatchingRules)
 	if MatchSymptoms(m.MatchingRules, *ctx) {
 		log.Trace("HTTP Tamperer Symptom Hit")
 		switch e {
@@ -165,8 +144,7 @@ func (m *HTTPTampererSymptom) MuckResponse(ctx *muxy.Context) {
 
 	// Body
 	if m.Response.Body != "" {
-		var cl io.ReadCloser
-		cl = &responseBody{body: []byte(m.Response.Body)}
+		cl := ioutil.NopCloser(bytes.NewReader([]byte(m.Response.Body)))
 		r := &http.Response{
 			Request:          ctx.Request,
 			Header:           ctx.Response.Header,
