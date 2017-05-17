@@ -50,7 +50,7 @@ func init() {
 }
 
 // Setup sets up the plugin
-func (m TCPTampererSymptom) Setup() {
+func (m *TCPTampererSymptom) Setup() {
 	log.Debug("TCP Tamperer Setup()")
 
 	// Add default (catch all) matching rule
@@ -63,7 +63,7 @@ func (m TCPTampererSymptom) Setup() {
 }
 
 // Teardown shuts down the plugin
-func (m TCPTampererSymptom) Teardown() {
+func (m *TCPTampererSymptom) Teardown() {
 	log.Debug("TCP Tamperer Teardown()")
 }
 
@@ -118,9 +118,9 @@ func (m *TCPTampererSymptom) MuckResponse(ctx *muxy.Context) {
 	}
 	if m.Response.Truncate {
 		// TODO: why 2 and 3?
-		if len(ctx.Bytes) >= 3 {
-			log.Debug("TCP Tamperer - randomizing body [%s] with [%s]", ctx.Bytes, ctx.Bytes[:len(ctx.Bytes)-3])
-			ctx.Bytes = ctx.Bytes[:len(ctx.Bytes)-3]
+		if len(ctx.Bytes) >= 2 {
+			log.Debug("TCP Tamperer - randomizing body [%s] with [%s]", ctx.Bytes, ctx.Bytes[:len(ctx.Bytes)-2])
+			ctx.Bytes = ctx.Bytes[:len(ctx.Bytes)-2]
 		}
 	}
 }
