@@ -29,18 +29,18 @@ func init() {
 	}, "tcp_proxy")
 }
 
-func check(err error) {
+var check = func(err error) {
 	if err != nil {
 		log.Fatalf("Error setting up TCP Proxy: %s", err.Error())
 	}
 }
 
-// Setup sets up the TCP proxy
+// Setup the TCP proxy
 func (p *TCPProxy) Setup(middleware []muxy.Middleware) {
 	p.middleware = middleware
 }
 
-// Teardown shuts down the TCP proxy
+// Teardown the TCP proxy
 func (p *TCPProxy) Teardown() {
 }
 
@@ -49,7 +49,6 @@ func (p *TCPProxy) Proxy() {
 	log.Trace("Checking connection: %s:%d", p.Host, p.Port)
 	laddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", p.Host, p.Port))
 	check(err)
-	log.Trace("Checking connection: %s:%d", p.ProxyHost, p.ProxyPort)
 	raddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", p.ProxyHost, p.ProxyPort))
 	check(err)
 	listener, err := net.ListenTCP("tcp", laddr)
@@ -59,7 +58,7 @@ func (p *TCPProxy) Proxy() {
 		log.Info("TCP Proxy proxy listening on %s", log.Colorize(log.BLUE, fmt.Sprintf("tcp://%s:%d", p.Host, p.Port)))
 		conn, err := listener.AcceptTCP()
 		if err != nil {
-			fmt.Printf("Failed to accept connection '%s'\n", err)
+			log.Error("Failed to accept connection", err)
 			continue
 		}
 		p.connID++
@@ -103,7 +102,7 @@ func (p *proxy) err(s string, err error) {
 		return
 	}
 	if err != io.EOF {
-		log.Warn(p.prefix+s, err)
+		log.Warn(p.prefix+s+"%v: ", err)
 	}
 	p.errsig <- true
 	p.erred = true
@@ -114,7 +113,9 @@ func (p *proxy) start() {
 	log.Trace("TCP Proxy Starting TCP Proxy")
 
 	defer p.lconn.Close()
-	//connect to remote
+
+	// connect to remote
+	log.Info("Connecting to %v", p.raddr)
 	rconn, err := net.DialTCP("tcp", nil, p.raddr)
 	if err != nil {
 		p.err("TCP Proxy remote connection failed: %s", err)
@@ -122,25 +123,28 @@ func (p *proxy) start() {
 	}
 	p.rconn = rconn
 	defer p.rconn.Close()
-	//nagles?
+
+	// nagles?
 	if p.nagles {
 		p.lconn.SetNoDelay(true)
 		p.rconn.SetNoDelay(true)
 	}
-	//display both ends
+
+	// display both ends
 	log.Info("TCP Proxy opened %s >>> %s", p.lconn.RemoteAddr().String(), p.rconn.RemoteAddr().String())
 
-	//bidirectional copy
+	// bidirectional copy
 	go p.pipe(p.lconn, p.rconn)
 	go p.pipe(p.rconn, p.lconn)
-	//wait for close...
 
+	//wait for close...
 	<-p.errsig
+
 	log.Info("TCP Proxy closed (%d bytes sent, %d bytes received)", p.sentBytes, p.receivedBytes)
 }
 
 func (p *proxy) pipe(src io.Reader, dst io.Writer) {
-	// Direction
+	// Direction of traffic
 	islocal := src == p.lconn
 
 	buff := make([]byte, p.packetsize)
@@ -149,7 +153,7 @@ func (p *proxy) pipe(src io.Reader, dst io.Writer) {
 		n, readErr := src.Read(buff)
 		if readErr != nil || n == 0 {
 			if !islocal {
-				p.err("TCP Proxy read failed '%s'\n", readErr)
+				p.err("TCP Proxy read failed: ", readErr)
 			}
 			done = true
 		}
