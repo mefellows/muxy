@@ -3,8 +3,6 @@ package command
 import (
 	"flag"
 	"strings"
-
-	"github.com/mefellows/muxy/muxy"
 )
 
 // ProxyCommand enables an http proxy for http tampering
@@ -16,7 +14,6 @@ type ProxyCommand struct {
 func (pc *ProxyCommand) Run(args []string) int {
 	cmdFlags := flag.NewFlagSet("proxy", flag.ContinueOnError)
 	cmdFlags.Usage = func() { pc.Meta.UI.Output(pc.Help()) }
-	c := &muxy.Config{}
 
 	cmdFlags.StringVar(&c.ConfigFile, "config", "", "Path to a YAML configuration file")
 
@@ -25,7 +22,6 @@ func (pc *ProxyCommand) Run(args []string) int {
 		return 1
 	}
 
-	muxy := muxy.New(c)
 	muxy.Run()
 
 	return 0

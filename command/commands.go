@@ -4,6 +4,7 @@ package command
 import (
 	"os"
 
+	m "github.com/mefellows/muxy/muxy"
 	pki "github.com/mefellows/pkigo/command"
 	"github.com/mitchellh/cli"
 )
@@ -14,7 +15,16 @@ var Commands map[string]cli.CommandFactory
 // UI wraps the commands available to the CLI
 var UI cli.Ui
 
+var muxy *m.Muxy
+var c *m.Config
+
 func init() {
+	setup()
+}
+
+func setup() {
+	c = &m.Config{}
+	muxy = m.New(c)
 
 	UI = &cli.ColoredUi{
 		Ui:          &cli.BasicUi{Writer: os.Stdout, Reader: os.Stdin, ErrorWriter: os.Stderr},
