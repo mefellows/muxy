@@ -212,22 +212,6 @@ func waitForPort(port int, t *testing.T) {
 	}
 }
 
-// GetFreePort Gets an available port by asking the kernal for a random port
-// ready and available for use.
-func GetFreePort() int {
-	addr, err := net.ResolveTCPAddr("tcp", ":0")
-	if err != nil {
-		return 0
-	}
-
-	l, err := net.ListenTCP("tcp", addr)
-	if err != nil {
-		return 0
-	}
-	defer l.Close()
-	return l.Addr().(*net.TCPAddr).Port
-}
-
 func TestTCPProxy_pipe(t *testing.T) {
 }
 
