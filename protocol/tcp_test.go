@@ -16,7 +16,6 @@ import (
 )
 
 func setupLocalTCP(port int) {
-	// port, _ = GetFreePort()
 	go func() {
 		l, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", port))
 		if err != nil {
@@ -54,9 +53,9 @@ func TestTCPProxy_Teardown(t *testing.T) {
 }
 
 func TestTCPProxy_Proxy(t *testing.T) {
-	proxyPort := GetFreePort()
+	proxyPort := 7777
 	proxyHost := "localhost"
-	port := GetFreePort()
+	port := 7778
 	setupLocalTCP(proxyPort)
 	p := TCPProxy{
 		Port:            port,
@@ -99,7 +98,7 @@ func TestTCPProxy_Proxy(t *testing.T) {
 	conn.CloseRead()
 }
 func TestTCPProxy_ProxyWithMiddleware(t *testing.T) {
-	proxyPort := GetFreePort()
+	proxyPort := 7779
 	proxyHost := "localhost"
 	setupLocalTCP(proxyPort)
 
@@ -120,7 +119,7 @@ func TestTCPProxy_ProxyWithMiddleware(t *testing.T) {
 	}
 	tamperer.Setup()
 
-	port := GetFreePort()
+	port := 7776
 	p := TCPProxy{
 		Port:            port,
 		Host:            "localhost",
@@ -173,7 +172,7 @@ func TestTCPProxy_ProxyFail(t *testing.T) {
 		check = oldCheck
 	}()
 
-	proxyPort := GetFreePort()
+	proxyPort := 7775
 	setupLocalTCP(proxyPort)
 	p := TCPProxy{
 		Port:            proxyPort,

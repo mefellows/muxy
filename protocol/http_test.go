@@ -272,8 +272,8 @@ func TestHTTPProxy_checkHTTPServerError(t *testing.T) {
 }
 
 func TestHTTPProxy_ProxyWithHTTP(t *testing.T) {
-	proxyPort := GetFreePort()
-	port := GetFreePort()
+	proxyPort := 6666
+	port := 6667
 
 	// Run Proxied Server
 	runTestServer(proxyPort)
@@ -313,8 +313,8 @@ func TestHTTPProxy_ProxyWithHTTP(t *testing.T) {
 }
 
 func TestHTTPProxy_ProxyWithHTTPs(t *testing.T) {
-	proxyPort := GetFreePort()
-	port := GetFreePort()
+	proxyPort := 6668
+	port := 6669
 
 	// Run Proxied Server
 	runTestServer(proxyPort)
