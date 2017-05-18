@@ -178,7 +178,7 @@ func TestTCPProxy_ProxyFail(t *testing.T) {
 		Port:            proxyPort,
 		Host:            "localhost",
 		ProxyHost:       "localhost",
-		ProxyPort:       proxyPort,
+		ProxyPort:       0,
 		PacketSize:      64,
 		NaglesAlgorithm: true,
 	}
