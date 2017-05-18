@@ -1,6 +1,11 @@
 package protocol
 
 import (
+	"crypto/tls"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"testing"
@@ -8,7 +13,9 @@ import (
 	"github.com/mefellows/muxy/muxy"
 )
 
-func TestMatchRule_Hit(t *testing.T) {
+var proxiedServerBody = "proxied server up!"
+
+func TestHTTPProxy_MatchRule_Hit(t *testing.T) {
 	proxy := HTTPProxy{}
 	defaultProxyRule := proxy.defaultProxyRule()
 	subPathProxyRule := ProxyRule{
@@ -62,7 +69,7 @@ func TestMatchRule_Hit(t *testing.T) {
 	}
 }
 
-func TestMatchRule_Miss(t *testing.T) {
+func TestHTTPProxy_MatchRule_Miss(t *testing.T) {
 	subPathProxyRule := ProxyRule{
 		Request: ProxyRequest{
 			Path: "^/bar",
@@ -113,7 +120,7 @@ func TestMatchRule_Miss(t *testing.T) {
 	}
 }
 
-func TestApplyProxyPassRule_Path(t *testing.T) {
+func TestHTTPProxy_ApplyProxyPassRule_Path(t *testing.T) {
 	proxy := HTTPProxy{}
 	subPathProxyRule := ProxyRule{
 		Request: ProxyRequest{},
@@ -153,7 +160,7 @@ func TestApplyProxyPassRule_Path(t *testing.T) {
 	}
 }
 
-func TestApplyProxyPassRule_Method(t *testing.T) {
+func TestHTTPProxy_ApplyProxyPassRule_Method(t *testing.T) {
 	proxy := HTTPProxy{}
 	hostProxyRule := ProxyRule{
 		Request: ProxyRequest{},
@@ -176,7 +183,7 @@ func TestApplyProxyPassRule_Method(t *testing.T) {
 	}
 }
 
-func TestApplyProxyPassRule_Scheme(t *testing.T) {
+func TestHTTPProxy_ApplyProxyPassRule_Scheme(t *testing.T) {
 	proxy := HTTPProxy{}
 	schemeProxyRule := ProxyRule{
 		Request: ProxyRequest{},
@@ -199,7 +206,7 @@ func TestApplyProxyPassRule_Scheme(t *testing.T) {
 	}
 }
 
-func TestApplyProxyPassRule_Host(t *testing.T) {
+func TestHTTPProxy_ApplyProxyPassRule_Host(t *testing.T) {
 	proxy := HTTPProxy{}
 	hostProxyRule := ProxyRule{
 		Request: ProxyRequest{},
@@ -222,7 +229,7 @@ func TestApplyProxyPassRule_Host(t *testing.T) {
 	}
 }
 
-func TestSetup(t *testing.T) {
+func TestHTTPProxy_Setup(t *testing.T) {
 	proxy := HTTPProxy{}
 	proxy.Setup([]muxy.Middleware{})
 
@@ -242,7 +249,12 @@ func TestSetup(t *testing.T) {
 	}
 }
 
-func TestDefaultProxyRule(t *testing.T) {
+func TestHTTPProxy_Teardown(t *testing.T) {
+	proxy := HTTPProxy{}
+	proxy.Teardown()
+}
+
+func TestHTTPProxy_DefaultProxyRule(t *testing.T) {
 	proxy := HTTPProxy{
 		ProxyHost: "foo.com",
 		ProxyPort: 1234,
@@ -253,4 +265,105 @@ func TestDefaultProxyRule(t *testing.T) {
 	if rule.Pass.Host != expected {
 		t.Fatal("Expected host to be", expected, "but got", rule.Pass.Host)
 	}
+}
+
+func TestHTTPProxy_checkHTTPServerError(t *testing.T) {
+	checkHTTPServerError(errors.New("fake error"))
+}
+
+func TestHTTPProxy_ProxyWithHTTP(t *testing.T) {
+	proxyPort := GetFreePort()
+	port := GetFreePort()
+
+	// Run Proxied Server
+	runTestServer(proxyPort)
+
+	// Run Muxy Proxy
+	proxy := HTTPProxy{
+		Port:          port,
+		Host:          "localhost",
+		Protocol:      "http",
+		Insecure:      true,
+		ProxyHost:     "localhost",
+		ProxyPort:     proxyPort,
+		ProxyProtocol: "http",
+	}
+	proxy.Setup([]muxy.Middleware{})
+	go proxy.Proxy()
+
+	// Wait for servers to be up
+	waitForPort(proxyPort, t)
+	waitForPort(port, t)
+
+	res, err := http.Get(fmt.Sprintf("http://localhost:%d", port))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Check body
+	body, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if string(body) != proxiedServerBody {
+		t.Fatal("Want", proxiedServerBody, "got", string(body))
+	}
+}
+
+func TestHTTPProxy_ProxyWithHTTPs(t *testing.T) {
+	proxyPort := GetFreePort()
+	port := GetFreePort()
+
+	// Run Proxied Server
+	runTestServer(proxyPort)
+
+	// Run Muxy Proxy
+	proxy := HTTPProxy{
+		Port:          port,
+		Host:          "localhost",
+		Protocol:      "https",
+		Insecure:      true,
+		ProxyHost:     "localhost",
+		ProxyPort:     proxyPort,
+		ProxyProtocol: "http",
+	}
+	proxy.Setup([]muxy.Middleware{})
+	go proxy.Proxy()
+
+	// Wait for servers to be up
+	waitForPort(proxyPort, t)
+	waitForPort(port, t)
+
+	// Insecure
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	res, err := client.Get(fmt.Sprintf("https://localhost:%d", port))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Check body
+	body, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if string(body) != proxiedServerBody {
+		t.Fatal("Want", proxiedServerBody, "got", string(body))
+	}
+}
+
+func runTestServer(port int) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		w.Write([]byte(proxiedServerBody))
+	})
+
+	go http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 }
