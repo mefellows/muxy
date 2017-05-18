@@ -175,10 +175,10 @@ func TestTCPProxy_ProxyFail(t *testing.T) {
 	proxyPort := 7775
 	setupLocalTCP(proxyPort)
 	p := TCPProxy{
-		Port:            proxyPort,
+		Port:            0,
 		Host:            "localhost",
 		ProxyHost:       "localhost",
-		ProxyPort:       0,
+		ProxyPort:       proxyPort,
 		PacketSize:      64,
 		NaglesAlgorithm: true,
 	}
