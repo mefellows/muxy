@@ -2,14 +2,14 @@ require 'formula'
 
 class Muxy < Formula
   homepage "https://github.com/packer-community/packer-windows-plugins"
-  version "0.0.1"
+  version "0.0.4"
 
   if Hardware.is_64_bit?
     url "https://github.com/mefellows/muxy/releases/download/v#{version}/darwin_amd64.zip"
-    sha256 'ba29e1b5c2666a91f37198ebef4397d497d262c3a4530eeed96d206824481634'
+    sha256 '6d4aa05dfd0d94c98e93b6306bf660228e7254108c9f970e84932be8087d93b5'
   else
     url "https://github.com/mefellows/muxy/releases/download/v#{version}/darwin_386.zip"
-    sha256 '9dad1e255359738c74d359b3e5e0580ad79f296b4cd6d7cfb350d5055b00fd87'
+    sha256 '51c6b34846cb1a2913e36af9b4eefe29d71b1d5efe053a720a500ec2f52a0378'
   end
 
   depends_on :arch => :intel
