@@ -1,0 +1,18 @@
+name: Network and HTTP screwer.
+description: Slow network to mobile levels, and add 1s delay to all messages
+loglevel: 1
+
+proxy:
+  - name: http_proxy
+    config:
+      host: 0.0.0.0
+      port: 8888
+      protocol: http
+      proxy_host: 0.0.0.0
+      proxy_port: 8889
+      proxy_protocol: http
+
+middleware:
+  - name: logger
+    config:
+      hex_output: false

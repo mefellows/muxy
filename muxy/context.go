@@ -1,3 +1,5 @@
+// Package muxy contains the main interfaces used throughout Muxy:
+// Context, Middleware and Proxy.
 package muxy
 
 import (

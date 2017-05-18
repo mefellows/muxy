@@ -1,14 +1,12 @@
-// Package muxy contains the main interfaces used throughout Muxy:
-// Context, Middleware and Proxy.
-//
-// It also contains the main Muxy entrypoints.
-package muxy
+// Package run contains the main Muxy entrypoints.
+package run
 
 import (
 	"os"
 	"os/signal"
 
 	"github.com/mefellows/muxy/log"
+	"github.com/mefellows/muxy/muxy"
 	"github.com/mefellows/plugo/plugo"
 )
 
@@ -30,8 +28,9 @@ type PluginConfig struct {
 // Muxy is the main orchestration component
 type Muxy struct {
 	config      *Config
-	middlewares []Middleware
-	proxies     []Proxy
+	middlewares []muxy.Middleware
+	proxies     []muxy.Proxy
+	sigChan     chan os.Signal
 }
 
 // New creates a new Muxy instance
@@ -55,8 +54,8 @@ func (m *Muxy) Run() {
 	}
 
 	// Interrupt handler
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, os.Kill)
+	m.sigChan = make(chan os.Signal, 1)
+	signal.Notify(m.sigChan, os.Interrupt, os.Kill)
 
 	// Start proxy
 	for _, proxy := range m.proxies {
@@ -64,7 +63,7 @@ func (m *Muxy) Run() {
 	}
 
 	// Block until a signal is received.
-	<-sigChan
+	<-m.sigChan
 	log.Info("Shutting down Muxy...")
 
 	for _, m := range m.middlewares {
@@ -91,18 +90,18 @@ func (m *Muxy) LoadPlugins() {
 	log.SetLevel(log.Level(c.LogLevel))
 
 	// Load all plugins
-	m.middlewares = make([]Middleware, len(c.Middleware))
+	m.middlewares = make([]muxy.Middleware, len(c.Middleware))
 	plugins := plugo.LoadPluginsWithConfig(confLoader, c.Middleware)
 	for i, p := range plugins {
 		log.Info("Loading plugin \t" + log.Colorize(log.YELLOW, c.Middleware[i].Name))
-		m.middlewares[i] = p.(Middleware)
+		m.middlewares[i] = p.(muxy.Middleware)
 	}
 
-	m.proxies = make([]Proxy, len(c.Proxy))
+	m.proxies = make([]muxy.Proxy, len(c.Proxy))
 	plugins = plugo.LoadPluginsWithConfig(confLoader, c.Proxy)
 	for i, p := range plugins {
 		log.Info("Loading proxy \t" + log.Colorize(log.YELLOW, c.Proxy[i].Name))
-		m.proxies[i] = p.(Proxy)
+		m.proxies[i] = p.(muxy.Proxy)
 		m.proxies[i].Setup(m.middlewares)
 	}
 }
