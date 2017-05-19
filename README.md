@@ -14,7 +14,7 @@ Muxy is a proxy that _mucks_ with your system and application context, operating
 
 If you are building a distributed system, Muxy can help you test your resilience and fault tolerance patterns.
 
-[![asciicast](https://asciinema.org/a/121081.png)](https://asciinema.org/a/121081)
+[![asciicast](https://cloud.githubusercontent.com/assets/53900/26228343/552a5868-3c7c-11e7-8fd1-7db357975c84.png)](https://asciinema.org/a/121081)
 
 ### Contents
 <!-- TOC depthFrom:2 depthTo:4 withLinks:1 updateOnSave:1 orderedList:0 -->
