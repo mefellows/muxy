@@ -141,48 +141,49 @@ func (m *HTTPTampererSymptom) MuckRequest(ctx *muxy.Context) {
 
 // MuckResponse adds chaos to the response
 func (m *HTTPTampererSymptom) MuckResponse(ctx *muxy.Context) {
-
-	// Body
-	if m.Response.Body != "" {
-		cl := ioutil.NopCloser(bytes.NewReader([]byte(m.Response.Body)))
-		r := &http.Response{
-			Request:          ctx.Request,
-			Header:           ctx.Response.Header,
-			Close:            ctx.Response.Close,
-			ContentLength:    ctx.Response.ContentLength,
-			Trailer:          ctx.Response.Trailer,
-			TLS:              ctx.Response.TLS,
-			TransferEncoding: ctx.Response.TransferEncoding,
-			Status:           ctx.Response.Status,
-			StatusCode:       ctx.Response.StatusCode,
-			Proto:            ctx.Response.Proto,
-			ProtoMajor:       ctx.Response.ProtoMajor,
-			ProtoMinor:       ctx.Response.ProtoMinor,
-			Body:             cl,
+	if ctx.Response != nil {
+		// Body
+		if m.Response.Body != "" {
+			cl := ioutil.NopCloser(bytes.NewReader([]byte(m.Response.Body)))
+			r := &http.Response{
+				Request:          ctx.Request,
+				Header:           ctx.Response.Header,
+				Close:            ctx.Response.Close,
+				ContentLength:    ctx.Response.ContentLength,
+				Trailer:          ctx.Response.Trailer,
+				TLS:              ctx.Response.TLS,
+				TransferEncoding: ctx.Response.TransferEncoding,
+				Status:           ctx.Response.Status,
+				StatusCode:       ctx.Response.StatusCode,
+				Proto:            ctx.Response.Proto,
+				ProtoMajor:       ctx.Response.ProtoMajor,
+				ProtoMinor:       ctx.Response.ProtoMinor,
+				Body:             cl,
+			}
+			log.Debug("HTTP Tamperer Injecting HTTP Response Body with [%s]", log.Colorize(log.BLUE, m.Response.Body))
+			*ctx.Response = *r
 		}
-		log.Debug("HTTP Tamperer Injecting HTTP Response Body with [%s]", log.Colorize(log.BLUE, m.Response.Body))
-		*ctx.Response = *r
-	}
 
-	// Set Cookies
-	for _, c := range m.Response.Cookies {
-		c.Expires = stringToDate(c.RawExpires)
-		log.Debug("HTTP Tamperer Spoofing Response Cookie [%s => %s]", log.Colorize(log.LIGHTMAGENTA, c.Name), c.String())
-		ctx.Response.Header.Add("Set-Cookie", c.String())
-	}
+		// Set Cookies
+		for _, c := range m.Response.Cookies {
+			c.Expires = stringToDate(c.RawExpires)
+			log.Debug("HTTP Tamperer Spoofing Response Cookie [%s => %s]", log.Colorize(log.LIGHTMAGENTA, c.Name), c.String())
+			ctx.Response.Header.Add("Set-Cookie", c.String())
+		}
 
-	// Set Headers
-	for k, v := range m.Response.Headers {
-		key := strings.ToTitle(strings.Replace(k, "_", "-", -1))
-		log.Debug("HTTP Tamperer Spoofing Response Header [%s => %s]", log.Colorize(log.LIGHTMAGENTA, key), v)
-		ctx.Response.Header.Add(key, v)
-	}
+		// Set Headers
+		for k, v := range m.Response.Headers {
+			key := strings.ToTitle(strings.Replace(k, "_", "-", -1))
+			log.Debug("HTTP Tamperer Spoofing Response Header [%s => %s]", log.Colorize(log.LIGHTMAGENTA, key), v)
+			ctx.Response.Header.Add(key, v)
+		}
 
-	// This Writes all headers, setting status code - so call this last
-	if m.Response.Status != 0 {
-		log.Debug("HTTP Tamperer Spoofing Response Code From [%d] to [%s]", ctx.Response.StatusCode, log.Colorize(log.LIGHTMAGENTA, fmt.Sprintf("%d", m.Response.Status)))
-		ctx.Response.StatusCode = m.Response.Status
-		ctx.Response.Status = http.StatusText(m.Response.Status)
+		// This Writes all headers, setting status code - so call this last
+		if m.Response.Status != 0 {
+			log.Debug("HTTP Tamperer Spoofing Response Code From [%d] to [%s]", ctx.Response.StatusCode, log.Colorize(log.LIGHTMAGENTA, fmt.Sprintf("%d", m.Response.Status)))
+			ctx.Response.StatusCode = m.Response.Status
+			ctx.Response.Status = http.StatusText(m.Response.Status)
+		}
 	}
 }
 

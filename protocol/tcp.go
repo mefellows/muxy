@@ -168,7 +168,7 @@ func (p *proxy) pipe(src io.Reader, dst io.Writer) {
 				log.Trace("TCP Proxy overwriting bytes sent to target: %s", ctx.Bytes)
 			} else {
 				middleware.HandleEvent(muxy.EventPostDispatch, ctx)
-				log.Trace("TCP Proxy overwriting bytes sent to client: %s", ctx.Bytes)
+				log.Trace("TCP Proxy overwriting bytes sent back to originating client: %s", ctx.Bytes)
 			}
 			b = ctx.Bytes
 		}
