@@ -10,7 +10,7 @@ Proxy for simulating real-world distributed system failures to improve resilienc
 
 ## Introduction
 
-Muxy is a proxy that _mucks_ with your system and application context, operating at Layers 4 and 7, allowing you to simulate common failure scenarios from the perspective of an application under test; such as an API or a web application.
+Muxy is a proxy that _mucks_ with your system and application context, operating at Layers 4, 5 and 7, allowing you to simulate common failure scenarios from the perspective of an application under test; such as an API or a web application.
 
 If you are building a distributed system, Muxy can help you test your resilience and fault tolerance patterns.
 
