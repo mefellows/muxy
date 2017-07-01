@@ -242,6 +242,7 @@ middleware:
       - method: 'GET|DELETE'
         path: '^/boo'
         host: 'foo\.com'
+        probability: 50  # Probability tamperer will fire
 ```
 
 #### HTTP Tamperer
@@ -296,7 +297,8 @@ middleware:
       matching_rules:
       - method: 'GET|DELETE'
         path: '^/boo'
-        host: 'foo\.com'              
+        host: 'foo\.com'
+        probability: 50
 ```
 
 #### Network Shaper
@@ -346,6 +348,8 @@ the last character of messages or randomise the text over the wire.
       body: "wow, new response!" # Override response body
       randomize: true             # Replaces response message with a random string
       truncate: true              # Removes last character from the response message
+    matching_rules:
+      - probability: 50           # Probability tamperer will fire      
 ```
 
 #### Logger

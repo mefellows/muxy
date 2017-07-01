@@ -10,6 +10,7 @@ import (
 
 func ping(c web.C, w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello from real API")
+	w.WriteHeader(http.StatusServiceUnavailable)
 }
 
 func main() {

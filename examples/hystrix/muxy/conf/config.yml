@@ -22,10 +22,10 @@ proxy:
   - name: http_proxy
     config:
       host: 0.0.0.0
-      port: 80
+      port: 8001
       protocol: http
-      proxy_host: backend
-      proxy_port: 80
+      proxy_host: localhost
+      proxy_port: 8002
       proxy_protocol: http
 
 ## Middleware
@@ -46,30 +46,17 @@ middleware:
     config:
       hex_output: false        # Display output as Hex instead of a string
 
-  ## Network Shaper - Layer 4 Tamperer.
+  ## HTTP Tamperer - Messes with Layer 7.
   ##
-  ## Uses Comcast (github.com/tylertreat/comcast) to shape and interfere with network traffic,
-  ## including bandwidth, latency, packet loss and jitter on specified ports, IPs and protocols.
+  ## Useful for messing with the HTTP protocol
   ##
-  ## NOTE: This plugin requires root/sudo access to run
-  #
-  - name: network_shape
+  - name: http_tamperer
     config:
-      latency:     500         # Latency to add in ms
-      target_bw:   750         # Bandwidth in kbits/s
-      default_bw:  750
-      packet_loss: 50           # Packet loss, as a %
-      target_ports:
-        - "80"
-      target_protos:           # Target protocols
-        - "tcp"
-        - "udp"
-        - "icmp"
-      target_ips:
-      - "0.0.0.0/0"
-      device: "eth0"
-
-  # - name: http_tamperer
-  #   config:
-  #     response:
-  #       status: 500              # Override HTTP Status code
+      response:
+        status: 500              # Override HTTP Status code
+        # headers:                 # Override response headers
+        #   content_length: "27"
+        #   x_foo_bar:      "baz"
+        body:      "my new body" # Override response body
+      matching_rules:
+        - probability: 20           # Probability tamperer will fire              

@@ -15,3 +15,9 @@ Ensure that Docker and Docker Compose is installed, and then run:
 ```
 ./run-tests.sh
 ```
+
+## TBC
+
+```
+time echo "GET http://localhost:8000/" | vegeta attack -duration=15s | tee results.bin | vegeta report
+```
