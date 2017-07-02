@@ -54,4 +54,13 @@ middleware:
         status: 500              # Override HTTP Status code
         body:      "my new body" # Override response body
       matching_rules:
-        - probability: 5           # Probability tamperer will fire              
+        - probability: 5           # Probability tamperer will fire      
+
+  ## Delay Tamperer
+  ## 
+  ## Artificially slow down a request to demonstrate effect of slow APIs        
+  - name: delay
+    config:
+      response_delay: 5000
+      matching_rules:
+        - probability: 10           # Probability tamperer will fire              

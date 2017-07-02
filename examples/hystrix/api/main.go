@@ -33,12 +33,7 @@ func ping(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 
 		return err
-	},
-		func(err error) error {
-			resultChan <- "Call from backup function"
-			return nil
-		},
-	)
+	}, nil)
 
 	// Block until we have a result or an error.
 	select {
@@ -46,7 +41,8 @@ func ping(c web.C, w http.ResponseWriter, r *http.Request) {
 		s.Incr("ok", 1)
 		fmt.Fprint(w, string(result))
 		w.WriteHeader(http.StatusOK)
-	case <-errChan:
+	case e := <-errChan:
+		fmt.Println(e)
 		s.Incr("err", 1)
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}

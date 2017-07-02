@@ -10,7 +10,7 @@ StatsD + Graphite + Grafana Dashboard (SGG Stack)
 Statsd makes this really simple, to test connectivity and that metrics are flowing through, issue the following command to send a counter with the name 'mattisawesome' to statsd:
 
 * `echo "mattisawesome:1000|c" | nc -w0 -u statsd.local 8125` (GNU/Linux)
-* `echo "mattisawesome:1000|c" | nc   -c -u statsd.local 8125` (BSD/Mac OSX)
+* `echo "mattisawesome:1000|c" | nc -c -u statsd.local 8125` (BSD/Mac OSX)
 
 You should then be able to browse to `http://statsd.local:8000/` and expand `stats > counters > mattisawesome` to see the counter updating.
 
