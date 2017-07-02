@@ -33,12 +33,7 @@ func ping(c web.C, w http.ResponseWriter, r *http.Request) {
 		}
 
 		return err
-	},
-		func(err error) error {
-			resultChan <- "Call from backup function"
-			return nil
-		},
-	)
+	}, nil)
 
 	// Block until we have a result or an error.
 	select {
