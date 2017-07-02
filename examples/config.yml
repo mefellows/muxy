@@ -29,8 +29,6 @@ proxy:
       packet_size: 64         # Size of each contiguous network packet to proxy
 
   ## HTTP Proxy: Configures an HTTP Proxy
-  ##
-  ## NOTE: SSL is currently not supported
   - name: http_proxy
     config:
       host: 0.0.0.0

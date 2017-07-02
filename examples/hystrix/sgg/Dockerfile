@@ -93,6 +93,7 @@ RUN     mkdir /src/dashboards
 ADD     ./grafana/dashboards/* /src/dashboards/
 RUN     mkdir /src/dashboard-loader
 ADD     ./grafana/dashboard-loader/dashboard-loader.js /src/dashboard-loader/
+ADD     ./grafana/dashboard-loader/* /src/dashboard-loader/
 
 # Configure nginx and supervisord
 ADD     ./nginx/nginx.conf /etc/nginx/nginx.conf

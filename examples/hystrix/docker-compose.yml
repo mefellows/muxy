@@ -3,11 +3,16 @@ api:
   build: api
   ports:
    - "8000:80"
+   - "8181:8181" # Hystrix stream
   expose:
   - "80"
+  - "8181"
   links:
   - muxy:backend
   - statsd:statsd
+  environment:
+  - "API_HOST=http://backend"
+  - "STATSD_HOST=statsd:8125"
 
 # Back-end service
 backend:
@@ -18,6 +23,8 @@ backend:
   - "80"
   links:
   - statsd:statsd
+  environment:
+  - "STATSD_HOST=statsd:8125"
 
 # Muxy resilience testing
 muxy:
@@ -38,6 +45,8 @@ test:
   command: go test -v ./...
   links:
     - api:api
+  environment:
+  - "API_HOST=http://api"
 
 statsd:
   build: sgg
@@ -49,7 +58,13 @@ statsd:
   - "9200:9200"
   - "9300:9300"
   - "8081:81"
+  - "80:80"
   volumes:
   - "./sgg/data/whisper:/opt/graphite/storage/whisper"
   - "./sgg/data/elasticsearch:/var/lib/elasticsearch"
   - "./sgg/data/sqllite:/opt/grafana/data"    
+
+hystrixdashboard:
+  image: kennedyoliveira/hystrix-dashboard
+  ports:
+  - "7979:7979"

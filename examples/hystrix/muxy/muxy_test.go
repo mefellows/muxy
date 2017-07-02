@@ -19,7 +19,6 @@ func Test_Example100calls(t *testing.T) {
 
 	fmt.Println("Running tests")
 
-	host := fmt.Sprintf("http://api/")
 	wait := &sync.WaitGroup{}
 	const numberOfRequests = 100
 
@@ -27,7 +26,7 @@ func Test_Example100calls(t *testing.T) {
 	for i := 0; i < numberOfRequests; i++ {
 		go func() {
 			defer wait.Done()
-			resp, err := http.Get(host)
+			resp, err := http.Get(os.Getenv("API_HOST"))
 			checkErr(err, false, t)
 			fmt.Println(resp)
 

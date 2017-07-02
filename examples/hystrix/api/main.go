@@ -3,21 +3,23 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/afex/hystrix-go/hystrix"
+	"github.com/quipo/statsd"
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
 )
+
+var s *statsd.StatsdClient
 
 func ping(c web.C, w http.ResponseWriter, r *http.Request) {
 	resultChan := make(chan string, 1)
 
 	errChan := hystrix.Go("call_backend", func() error {
-		fmt.Println("call backend hystrix......")
-		res, err := http.Get("http://localhost:8001/")
+		res, err := http.Get(os.Getenv("API_HOST"))
 
 		if err == nil && res != nil {
 			if res.StatusCode > 400 {
@@ -32,29 +34,39 @@ func ping(c web.C, w http.ResponseWriter, r *http.Request) {
 
 		return err
 	},
-		nil,
-		// func(err error) error {
-		// 	fmt.Println("call backup......")
-		// 	// do this when services are down
-		// 	resultChan <- "Hello from backup function!"
-
-		// 	return nil
-		// },
+		func(err error) error {
+			resultChan <- "Call from backup function"
+			return nil
+		},
 	)
 
 	// Block until we have a result or an error.
 	select {
 	case result := <-resultChan:
-		log.Println("success:", result)
+		s.Incr("ok", 1)
 		fmt.Fprint(w, string(result))
 		w.WriteHeader(http.StatusOK)
-	case err := <-errChan:
-		log.Println("failure:", err)
+	case <-errChan:
+		s.Incr("err", 1)
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 }
 
 func main() {
+	// Setup Statsd client
+	fmt.Println("Connecting to Statsd server...")
+
+	prefix := "muxy."
+	statsdclient := statsd.NewStatsdClient(os.Getenv("STATSD_HOST"), prefix)
+	s = statsdclient
+	statsdclient.CreateSocket()
+
+	if s == nil {
+		fmt.Println("Could not connect to statsd server, exiting")
+		os.Exit(1)
+	}
+
+	// Setup hystrix streams
 	hystrixStreamHandler := hystrix.NewStreamHandler()
 	hystrixStreamHandler.Start()
 	go http.ListenAndServe(net.JoinHostPort("", "8181"), hystrixStreamHandler)
