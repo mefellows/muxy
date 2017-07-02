@@ -1,0 +1,5 @@
+DeployTest.psd1
+*.log
+/.project
+*.sw[op]
+data
