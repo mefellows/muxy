@@ -48,10 +48,18 @@ middleware:
   ##
   ## Useful for messing with the HTTP protocol
   ##
-  - name: http_tamperer
+  # - name: http_tamperer
+  #   config:
+  #     response:
+  #       status: 500              # Override HTTP Status code
+  #       body:      "my new body" # Override response body
+  #     matching_rules:
+  #       - probability: 5           # Probability tamperer will fire    
+
+
+  # Message Delay request/response plugin
+  - name: delay
     config:
-      response:
-        status: 500              # Override HTTP Status code
-        body:      "my new body" # Override response body
-      matching_rules:
-        - probability: 5           # Probability tamperer will fire              
+      response_delay: 5000                  
+    matching_rules:
+      - probability: 10           # Probability tamperer will fire    
