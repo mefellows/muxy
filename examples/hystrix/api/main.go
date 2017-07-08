@@ -6,12 +6,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/quipo/statsd"
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
 )
-
-var s *statsd.StatsdClient
 
 func ping(c web.C, w http.ResponseWriter, r *http.Request) {
 	res, err := http.Get(os.Getenv("API_HOST"))
