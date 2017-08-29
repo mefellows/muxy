@@ -89,7 +89,9 @@ func TestHTTPTampererSymptom_MuckResponse(t *testing.T) {
 		Response: ResponseConfig{
 			Body: "my new body",
 			Headers: map[string]string{
-				"MyNewHeader": "MyNewHeader",
+				"MyNewHeader":      "MyNewHeader",
+				"MyOriginalHeader": "Modified!",
+				"Content-Type":     "application/modified",
 			},
 			Cookies: []http.Cookie{
 				http.Cookie{
@@ -106,6 +108,7 @@ func TestHTTPTampererSymptom_MuckResponse(t *testing.T) {
 			Status:     "301",
 			StatusCode: 301,
 			Header: map[string][]string{
+				"Content-Type":     []string{"application/json"},
 				"MyOriginalHeader": []string{"MyOriginalHeader"},
 			},
 		},
@@ -119,6 +122,13 @@ func TestHTTPTampererSymptom_MuckResponse(t *testing.T) {
 	}
 	if ctx.Response.Header.Get("MyNewHeader") != "MyNewHeader" {
 		t.Fatal("Expected response header to be tampered to contain 'MyNewHeader', got", ctx.Response.Header.Get("MyNewHeader"))
+	}
+	if ctx.Response.Header.Get("MyOriginalHeader") != "Modified!" {
+		t.Fatal("Expected 'MyOriginalHeader' to be modified, got", ctx.Response.Header.Get("MyOriginalHeader"))
+	}
+	// Content-Type is a special case, testing this specifically
+	if ctx.Response.Header.Get("Content-Type") != "application/modified" {
+		t.Fatal("Expected 'Content-Type' to be modified, got", ctx.Response.Header.Get("Content-Type"))
 	}
 	if ctx.Response.StatusCode != 200 {
 		t.Fatal("Expected response status code to be tampered to be 200, got", ctx.Response.StatusCode)

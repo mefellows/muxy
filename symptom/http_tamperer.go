@@ -175,7 +175,7 @@ func (m *HTTPTampererSymptom) MuckResponse(ctx *muxy.Context) {
 		for k, v := range m.Response.Headers {
 			key := strings.ToTitle(strings.Replace(k, "_", "-", -1))
 			log.Debug("HTTP Tamperer Spoofing Response Header [%s => %s]", log.Colorize(log.LIGHTMAGENTA, key), v)
-			ctx.Response.Header.Add(key, v)
+			ctx.Response.Header.Set(key, v)
 		}
 
 		// This Writes all headers, setting status code - so call this last
