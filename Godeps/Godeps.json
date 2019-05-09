@@ -16,16 +16,6 @@
 			"Rev": "56b76bdf51f7708750eac80fa38b952bb9f32639"
 		},
 		{
-			"ImportPath": "github.com/mefellows/mirror/filesystem",
-			"Comment": "pre-release-13-g9323a11",
-			"Rev": "9323a111ef2b01481c5d4aeefd6e018d04bf65ee"
-		},
-		{
-			"ImportPath": "github.com/mefellows/mirror/mirror",
-			"Comment": "pre-release-13-g9323a11",
-			"Rev": "9323a111ef2b01481c5d4aeefd6e018d04bf65ee"
-		},
-		{
 			"ImportPath": "github.com/mefellows/pkigo/command",
 			"Rev": "9da6cd12d19093622a0b8ed6d686e9ed2dc312bc"
 		},
@@ -52,15 +42,6 @@
 		{
 			"ImportPath": "github.com/spf13/cast",
 			"Rev": "ee815aaf958c707ad07547cd62150d973710f747"
-		},
-		{
-			"ImportPath": "github.com/spf13/jwalterweatherman",
-			"Rev": "3d60171a64319ef63c78bd45bd60e6eab1e75f8b"
-		},
-		{
-			"ImportPath": "github.com/tylertreat/comcast/throttler",
-			"Comment": "v1.0.1-8-g0a7b9a1",
-			"Rev": "0a7b9a11253ff629123939177f37630052d854d4"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
