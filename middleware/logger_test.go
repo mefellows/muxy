@@ -18,14 +18,14 @@ func TestLogger_Setup(t *testing.T) {
 		t.Fatal("Want false got true")
 	}
 	if l.format != "%s" {
-		t.Fatal("Want '%s' got'", l.HexOutput, "'")
+		t.Fatal("Want 's' got'", l.HexOutput, "'")
 	}
 
 	l = LoggerMiddleware{HexOutput: true}
 	l.Setup()
 
 	if l.format == "%s" {
-		t.Fatal("Want '%x' got'", l.HexOutput, "'")
+		t.Fatal("Want 'x' got'", l.HexOutput, "'")
 	}
 }
 
