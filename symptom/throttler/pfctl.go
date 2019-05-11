@@ -1,7 +1,6 @@
 package throttler
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -48,13 +47,13 @@ func (i *pfctlThrottler) setup(c *Config) error {
 	// Enable firewall
 	err := i.c.execute(pfctlEnableFirewall)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Could not enable firewall using: `%s`. Error: %s", pfctlEnableFirewall, err.Error()))
+		return fmt.Errorf("Could not enable firewall using: `%s`. Error: %s", pfctlEnableFirewall, err.Error())
 	}
 
 	// Add the dummynet and anchor
 	err = i.c.execute(pfctlCreateAnchor)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Could not create anchor rule for dummynet using: `%s`. Error: %s", pfctlCreateAnchor, err.Error()))
+		return fmt.Errorf("Could not create anchor rule for dummynet using: `%s`. Error: %s", pfctlCreateAnchor, err.Error())
 	}
 
 	// Add 'execute' portion of the command
@@ -62,7 +61,7 @@ func (i *pfctlThrottler) setup(c *Config) error {
 
 	err = i.c.execute(cmd)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Could not create dummynet using: `%s`. Error: %s", pfctlCreateDummynet, err.Error()))
+		return fmt.Errorf("Could not create dummynet using: `%s`. Error: %s", pfctlCreateDummynet, err.Error())
 	}
 
 	// Apply the shaping etc.
@@ -81,19 +80,19 @@ func (i *pfctlThrottler) teardown(_ *Config) error {
 	// Reset firewall rules, leave it running
 	err := i.c.execute(pfctlTeardown)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Could not remove firewall rules using: `%s`. Error: %s", pfctlTeardown, err.Error()))
+		return fmt.Errorf("Could not remove firewall rules using: `%s`. Error: %s", pfctlTeardown, err.Error())
 	}
 
 	// Turn off the firewall, discarding any rules
 	err = i.c.execute(pfctlDisableFirewall)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Could not disable firewall using: `%s`. Error: %s", pfctlDisableFirewall, err.Error()))
+		return fmt.Errorf("Could not disable firewall using: `%s`. Error: %s", pfctlDisableFirewall, err.Error())
 	}
 
 	// Disable dnctl rules
 	err = i.c.execute(dnctlTeardown)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Could not disable dnctl rules using: `%s`. Error: %s", dnctlTeardown, err.Error()))
+		return fmt.Errorf("Could not disable dnctl rules using: `%s`. Error: %s", dnctlTeardown, err.Error())
 	}
 
 	return nil
@@ -142,15 +141,15 @@ func addIpsAndProtoToCommands(ipVersion int, cmds []string, ips []string, protos
 
 	for _, cmd := range cmds {
 		for _, ip := range ips {
-			srcIpFlag := "src-ip"
-			dstIpFlag := "dst-ip"
+			srcIPFlag := "src-ip"
+			dstIPFlag := "dst-ip"
 			if ipVersion == 6 {
-				srcIpFlag = "src-ip6"
-				dstIpFlag = "dst-ip6"
+				srcIPFlag = "src-ip6"
+				dstIPFlag = "dst-ip6"
 			}
 
-			commands = append(commands, addProtoToCommands(ipVersion, fmt.Sprintf("%s %s %s", cmd, srcIpFlag, ip), protos)...)
-			commands = append(commands, addProtoToCommands(ipVersion, fmt.Sprintf("%s %s %s", cmd, dstIpFlag, ip), protos)...)
+			commands = append(commands, addProtoToCommands(ipVersion, fmt.Sprintf("%s %s %s", cmd, srcIPFlag, ip), protos)...)
+			commands = append(commands, addProtoToCommands(ipVersion, fmt.Sprintf("%s %s %s", cmd, dstIPFlag, ip), protos)...)
 		}
 	}
 

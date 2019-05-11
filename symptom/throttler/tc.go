@@ -214,10 +214,8 @@ func (t *tcThrottler) teardown(cfg *Config) error {
 	}
 
 	// The root node to append the filters
-	if err := delRootQDisc(cfg, t.c); err != nil {
-		return err
-	}
-	return nil
+	err := delRootQDisc(cfg, t.c)
+	return err
 }
 
 func delIptablesRules(cfg *Config, c commander) error {
