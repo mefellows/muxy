@@ -1,6 +1,5 @@
 # <img src="https://cloud.githubusercontent.com/assets/53900/26097013/7c930660-3a66-11e7-9b5c-780b0630d5a4.gif" alt="Muxy Logo" style="height: 80px;" height="80px"/>
 
-
 Proxy for simulating real-world distributed system failures to improve resilience in your applications.
 
 [![wercker status](https://app.wercker.com/status/e45703ebafd48632db56f022cc54546b/s "wercker status")](https://app.wercker.com/project/bykey/e45703ebafd48632db56f022cc54546b)
@@ -19,52 +18,35 @@ If you are building a distributed system, Muxy can help you test your resilience
 </p>
 
 ### Contents
+
 <!-- TOC depthFrom:2 depthTo:4 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-- [Introduction](#introduction)
-	- [Contents](#contents)
+- [Introduction](#introduction) - [Contents](#contents)
 - [Features](#features)
-- [Installation](#installation)
-	- [On Mac OSX using Homebrew](#on-mac-osx-using-homebrew)
-	- [Using Go Get](#using-go-get)
-- [Using Muxy](#using-muxy)
-	- [5-minute example](#5-minute-example)
-	- [Muxy as part of a test suite](#muxy-as-part-of-a-test-suite)
-	- [Notes](#notes)
-- [Proxies and Middlewares](#proxies-and-middlewares)
-	- [Proxies](#proxies)
-		- [HTTP Proxy](#http-proxy)
-		- [TCP Proxy](#tcp-proxy)
-	- [Middleware](#middleware)
-		- [Delay](#delay)
-		- [HTTP Tamperer](#http-tamperer)
-		- [Network Shaper](#network-shaper)
-		- [TCP Tamperer](#tcp-tamperer)
-		- [Logger](#logger)
+- [Installation](#installation) - [On Mac OSX using Homebrew](#on-mac-osx-using-homebrew) - [Using Go Get](#using-go-get)
+- [Using Muxy](#using-muxy) - [5-minute example](#5-minute-example) - [Muxy as part of a test suite](#muxy-as-part-of-a-test-suite) - [Notes](#notes)
+- [Proxies and Middlewares](#proxies-and-middlewares) - [Proxies](#proxies) - [HTTP Proxy](#http-proxy) - [TCP Proxy](#tcp-proxy) - [Middleware](#middleware) - [Delay](#delay) - [HTTP Tamperer](#http-tamperer) - [Network Shaper](#network-shaper) - [TCP Tamperer](#tcp-tamperer) - [Logger](#logger)
 - [Configuration Reference](#configuration-reference)
-- [Examples](#examples)
-	- [Hystrix](#hystrix)
+- [Examples](#examples) - [Hystrix](#hystrix)
 - [Usage with Docker](#usage-with-docker)
-- [Extending Muxy](#extending-muxy)
-	- [Proxies](#proxies)
-	- [Middleware](#middleware)
+- [Extending Muxy](#extending-muxy) - [Proxies](#proxies) - [Middleware](#middleware)
 - [Contributing](#contributing)
 
 <!-- /TOC -->
 
 ## Features
 
-* Ability to tamper with network devices at the transport level (Layer 4)
-* Ability to tamper with the TCP session layer (Layer 5)
-* ...and HTTP requests/responses at the HTTP protocol level (Layer 7)
-    * Supports custom proxy routing (aka basic reverse proxy)
-    * Advanced matching rules allow you to target specific requests
-    * Introduce randomness into symptoms
-* Simulate real-world network connectivity problems/partitions for mobile devices, distributed systems etc.
-* Ideal for use in CI/Test Suites to test resilience across languages/technologies
-* Simple native binary installation with no dependencies
-* Extensible and modular architecture
-* An official Docker [container](https://github.com/mefellows/docker-muxy) to simplify uses cases such as Docker Compose
+- Ability to tamper with network devices at the transport level (Layer 4)
+- Ability to tamper with the TCP session layer (Layer 5)
+- ...and HTTP requests/responses at the HTTP protocol level (Layer 7)
+  - Supports custom proxy routing (aka basic reverse proxy)
+  - Advanced matching rules allow you to target specific requests
+  - Introduce randomness into symptoms
+- Simulate real-world network connectivity problems/partitions for mobile devices, distributed systems etc.
+- Ideal for use in CI/Test Suites to test resilience across languages/technologies
+- Simple native binary installation with no dependencies
+- Extensible and modular architecture
+- An official Docker [container](https://github.com/mefellows/docker-muxy) to simplify uses cases such as Docker Compose
 
 ## Installation
 
@@ -89,44 +71,44 @@ go get github.com/mefellows/muxy
 
 Muxy is typically used in two ways:
 
-  1. In local development to see how your application responds
-  under certain conditions
-  1. In test suites to automate resilience testing
+1. In local development to see how your application responds
+   under certain conditions
+1. In test suites to automate resilience testing
 
 ### 5-minute example
 
 1. Install Muxy
 1. Create configuration file `config.yml`:
 
-    ```yaml
-    # Configures a proxy to forward/mess with your requests
-    # to/from www.onegeek.com.au. This example adds a 5s delay
-    # to the response.
-    proxy:
-      - name: http_proxy
-        config:
-          host: 0.0.0.0
-          port: 8181
-          proxy_host: www.onegeek.com.au
-          proxy_port: 80
+   ```yaml
+   # Configures a proxy to forward/mess with your requests
+   # to/from www.onegeek.com.au. This example adds a 5s delay
+   # to the response.
+   proxy:
+     - name: http_proxy
+       config:
+         host: 0.0.0.0
+         port: 8181
+         proxy_host: www.onegeek.com.au
+         proxy_port: 80
 
-    # Proxy plugins
-    middleware:
-      - name: http_tamperer
-        config:
-          request:
-            host: "www.onegeek.com.au"
+   # Proxy plugins
+   middleware:
+     - name: http_tamperer
+       config:
+         request:
+           host: "www.onegeek.com.au"
 
-      # Message Delay request/response plugin
-      - name: delay
-        config:
-          request_delay: 1000
-          response_delay: 500
+     # Message Delay request/response plugin
+     - name: delay
+       config:
+         request_delay: 1000
+         response_delay: 500
 
-      # Log in/out messages
-      - name: logger
+     # Log in/out messages
+     - name: logger
+   ```
 
-    ```
 1. Run Muxy with your config: `muxy proxy --config ./config.yml`
 1. Make a request to www.onegeek.com via the proxy: `time curl -v -H"Host: www.onegeek.com.au" http://localhost:8181/`. Compare that with a request direct to the website: `time curl -v www.onegeek.com.au` - it should be approximately 5s faster.
 
@@ -137,10 +119,10 @@ That's it - running Muxy is a matter of configuring one or more [Proxies](#proxi
 1. Create an application
 2. Build in fault tolerence (e.g. using something like [Hystrix](https://github.com/Netflix/Hystrix))
 3. Create integration tests
-  1. Run Muxy configuring a *proxy* such as HTTP, and one or more *symptom*s such as network latency, partition or HTTP error
-  2. Point your app at Muxy
-  3. Run tests and check if system behaved as expected
-4. Profit!
+4. Run Muxy configuring a _proxy_ such as HTTP, and one or more *symptom*s such as network latency, partition or HTTP error
+5. Point your app at Muxy
+6. Run tests and check if system behaved as expected
+7. Profit!
 
 ### Notes
 
@@ -150,6 +132,7 @@ It is also recommended to run within a container/virtual machine to avoid uninte
 ## Proxies and Middlewares
 
 ### Proxies
+
 #### HTTP Proxy
 
 Simple HTTP(s) Proxy that starts up on a local IP/Hostname and Port.
@@ -208,8 +191,8 @@ Example configuration snippet:
 proxy:
   - name: tcp_proxy
     config:
-      host: 0.0.0.0           # Local ip/hostname to bind to and accept connections.
-      port: 8080              # Local port to bind to
+      host: 0.0.0.0 # Local ip/hostname to bind to and accept connections.
+      port: 8080 # Local port to bind to
       proxy_host: 0.0.0.0
       proxy_port: 2000
       nagles_algorithm: true
@@ -232,8 +215,8 @@ Example configuration snippet:
 middleware:
   - name: delay
     config:
-      request_delay: 1000      # Delay in ms to apply to request to target
-      response_delay: 500      # Delay in ms to apply to response from target
+      request_delay: 1000 # Delay in ms to apply to request to target
+      response_delay: 500 # Delay in ms to apply to response from target
 
       # Specify additional matching rules. Default is to apply delay to all
       # requests on all http proxies.
@@ -241,9 +224,9 @@ middleware:
       # and must be properly YAML escaped.
       # See https://github.com/mefellows/muxy/issues/11 for behaviour.
       matching_rules:
-      - method: 'GET|DELETE'
-        path: '^/boo'
-        host: 'foo\.com'
+        - method: "GET|DELETE"
+          path: "^/boo"
+          host: 'foo\.com'
 ```
 
 #### HTTP Tamperer
@@ -257,38 +240,38 @@ middleware:
   - name: http_tamperer
     config:
       request:
-        host:       "somehost"   # Override Host header that's sent to target
-        path:             "/"    # Override the request path
-        method:           "GET"  # Override request method
+        host: "somehost" # Override Host header that's sent to target
+        path: "/" # Override the request path
+        method: "GET" # Override request method
         headers:
-          x_my_request:   "foo"  # Override request header
+          x_my_request: "foo" # Override request header
           content_type: "application/x-www-form-urlencoded"
           content_length: "5"
-        cookies:                 # Custom request cookies
-            - name: "fooreq"
-              value: "blahaoeuaoeu"
-              domain: "localhost"
-              path: "/foopath"
-              secure: true
-              rawexpires: "Sat, 12 Sep 2015 09:19:48 UTC"
-              maxage: 200
-              httponly: true
-        body: "wow, new body!"   # Override request body
+        cookies: # Custom request cookies
+          - name: "fooreq"
+            value: "blahaoeuaoeu"
+            domain: "localhost"
+            path: "/foopath"
+            secure: true
+            rawexpires: "Sat, 12 Sep 2015 09:19:48 UTC"
+            maxage: 200
+            httponly: true
+        body: "wow, new body!" # Override request body
       response:
-        status: 201              # Override HTTP Status code
-        headers:                 # Override response headers
+        status: 201 # Override HTTP Status code
+        headers: # Override response headers
           content_length: "27"
-          x_foo_bar:      "baz"
-        body:      "my new body" # Override response body
-        cookies:                 # Custom response cookies
-            - name: "foo"
-              value: "blahaoeuaoeu"
-              domain: "localhost"
-              path: "/foopath"
-              secure: true
-              rawexpires: "Sat, 12 Sep 2015 09:19:48 UTC"
-              maxage: 200
-              httponly: true
+          x_foo_bar: "baz"
+        body: "my new body" # Override response body
+        cookies: # Custom response cookies
+          - name: "foo"
+            value: "blahaoeuaoeu"
+            domain: "localhost"
+            path: "/foopath"
+            secure: true
+            rawexpires: "Sat, 12 Sep 2015 09:19:48 UTC"
+            maxage: 200
+            httponly: true
 
       # Specify additional matching rules. Default is to apply delay to all
       # requests on all http proxies.
@@ -296,39 +279,39 @@ middleware:
       # and must be properly YAML escaped.
       # See https://github.com/mefellows/muxy/issues/11 for behaviour.
       matching_rules:
-      - method: 'GET|DELETE'
-        path: '^/boo'
-        host: 'foo\.com'              
+        - method: "GET|DELETE"
+          path: "^/boo"
+          host: 'foo\.com'
 ```
 
 #### Network Shaper
 
-The network shaper plugin is a Layer 4 tamperer, and requires *root access* to work, as it needs to configure the local firewall and network devices.
+The network shaper plugin is a Layer 4 tamperer, and requires _root access_ to work, as it needs to configure the local firewall and network devices.
 Using the excellent [Comcast](https://github.com/tylertreat/comcast) library, it can shape and interfere with network traffic,
 including bandwidth, latency, packet loss and jitter on specified ports, IPs and protocols.
 
-NOTE: This component only works on MacOSX, FreeBSD, Linux and common *nix flavours.
+NOTE: This component only works on MacOSX, FreeBSD, Linux and common \*nix flavours.
 
 Example configuration snippet:
 
 ```yaml
 middleware:
-
   - name: network_shape
     config:
-      latency:     250         # Latency to add in ms
-      target_bw:   750         # Bandwidth in kbits/s
-      packet_loss: 0.5         # Packet loss, as a %
-      target_ips:              # Target ipv4 IP addresses
+      latency: 250 # Latency to add in ms
+      target_bw: 750 # Bandwidth in kbits/s
+      packet_loss: 0.5 # Packet loss, as a %
+      target_ips: # Target ipv4 IP addresses
         - 0.0.0.0
-      target_ips6:             # Target ipv6 IP addresses
+      target_ips6: # Target ipv6 IP addresses
         - "::1/128"
-      target_ports:            # Target destination ports
+      target_ports: # Target destination ports
         - "80"
-      target_protos:           # Target protocols
+      target_protos: # Target protocols
         - "tcp"
         - "udp"
         - "icmp"
+      device: "lo" # defaults to eth0
 ```
 
 #### TCP Tamperer
@@ -341,13 +324,13 @@ the last character of messages or randomise the text over the wire.
 - name: tcp_tamperer
   config:
     request:
-      body: "wow, new request!"   # Override request body
-      randomize: true             # Replaces input message with a random string
-      truncate: true              # Removes last character from the request message
+      body: "wow, new request!" # Override request body
+      randomize: true # Replaces input message with a random string
+      truncate: true # Removes last character from the request message
     response:
       body: "wow, new response!" # Override response body
-      randomize: true             # Replaces response message with a random string
-      truncate: true              # Removes last character from the response message
+      randomize: true # Replaces response message with a random string
+      truncate: true # Removes last character from the response message
 ```
 
 #### Logger
@@ -360,7 +343,7 @@ Example configuration snippet:
 middleware:
   - name: logger
     config:
-      hex_output: false        # Display output as Hex instead of a string
+      hex_output: false # Display output as Hex instead of a string
 ```
 
 ## Configuration Reference
@@ -408,7 +391,7 @@ Take a look at the [HTTP Proxy](protocol/http.go) for a good working example.
 
 ### Middleware
 
-Middlewares implement the [Middleware](/muxy/middle.go) interface  and register themselves via `PluginFactories.register` to be available at runtime.
+Middlewares implement the [Middleware](/muxy/middle.go) interface and register themselves via `PluginFactories.register` to be available at runtime.
 Take a look at the [HTTP Delay](symptom/http_delay.go) for a good working example.
 
 ## Contributing

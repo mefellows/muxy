@@ -1,5 +1,3 @@
-// Package throttler is a modified version of https://github.com/tylertreat/comcast/,
-// with hard exits removed for use as a library
 package throttler
 
 import (

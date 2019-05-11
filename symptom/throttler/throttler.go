@@ -1,9 +1,12 @@
+// package throttler is taken from https://github.com/tylertreat/comcast
+// and modified for use as a library
 package throttler
 
 import (
 	"bufio"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -55,34 +58,33 @@ var dry bool
 
 func setup(t throttler, cfg *Config) {
 	if t.exists() {
-		fmt.Println("It looks like the packet rules are already setup")
+		log.Println("[TRACE] It looks like the packet rules are already setup")
 		return
 	}
 
 	if err := t.setup(cfg); err != nil {
-		fmt.Println("I couldn't setup the packet rules:", err.Error())
+		log.Println("[TRACE] I couldn't setup the packet rules:", err.Error())
 		return
 	}
 
-	fmt.Println("Packet rules setup...")
-	fmt.Printf("Run `%s` to double check\n", t.check())
-	fmt.Printf("Run `%s --device %s --stop` to reset\n", os.Args[0], cfg.Device)
+	log.Println("[TRACE] Packet rules setup...")
+	log.Printf("[TRACE] Run `%s` to double check\n", t.check())
 }
 
 func teardown(t throttler, cfg *Config) {
 	if !t.exists() {
-		fmt.Println("It looks like the packet rules aren't setup")
+		log.Println("[TRACE] It looks like the packet rules aren't setup")
 		return
 	}
 
 	if err := t.teardown(cfg); err != nil {
-		fmt.Println("Failed to stop packet controls")
+		log.Println("[TRACE] Failed to stop packet controls")
 		return
 	}
 
-	fmt.Println("Packet rules stopped...")
-	fmt.Printf("Run `%s` to double check\n", t.check())
-	fmt.Printf("Run `%s` to start\n", os.Args[0])
+	log.Println("[TRACE] Packet rules stopped...")
+	log.Printf("[TRACE] Run `%s` to double check\n", t.check())
+	log.Printf("[TRACE] Run `%s` to start\n", os.Args[0])
 }
 
 // Run executes the packet filter operation, either setting it up or tearing
@@ -101,7 +103,7 @@ func Run(cfg *Config) {
 	switch runtime.GOOS {
 	case freebsd:
 		if cfg.Device == "" {
-			fmt.Println("Device not specified, unable to default to eth0 on FreeBSD.")
+			log.Println("[TRACE] Device not specified, unable to default to eth0 on FreeBSD.")
 			return
 		}
 
@@ -113,7 +115,7 @@ func Run(cfg *Config) {
 		} else if c.commandExists(ipfw) {
 			t = &ipfwThrottler{c}
 		} else {
-			fmt.Println("Could not determine an appropriate firewall tool for OSX (tried pfctl, ipfw), exiting")
+			log.Println("[TRACE] Could not determine an appropriate firewall tool for OSX (tried pfctl, ipfw), exiting")
 			return
 		}
 
@@ -128,7 +130,7 @@ func Run(cfg *Config) {
 
 		t = &tcThrottler{c}
 	default:
-		fmt.Printf("I don't support your OS: %s\n", runtime.GOOS)
+		log.Printf("[TRACE] I don't support your OS: %s\n", runtime.GOOS)
 		return
 	}
 
@@ -140,12 +142,12 @@ func Run(cfg *Config) {
 }
 
 func (c *dryRunCommander) execute(cmd string) error {
-	fmt.Println(cmd)
+	log.Println("[TRACE]", cmd)
 	return nil
 }
 
 func (c *dryRunCommander) executeGetLines(cmd string) ([]string, error) {
-	fmt.Println(cmd)
+	log.Println("[TRACE]", cmd)
 	return []string{}, nil
 }
 
@@ -154,7 +156,7 @@ func (c *dryRunCommander) commandExists(cmd string) bool {
 }
 
 func (c *shellCommander) execute(cmd string) error {
-	fmt.Println(cmd)
+	log.Println("[TRACE]", cmd)
 	return exec.Command("/bin/sh", "-c", cmd).Run()
 }
 

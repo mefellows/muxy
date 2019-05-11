@@ -105,11 +105,10 @@ func supressOutput(f func()) {
 		var buf bytes.Buffer
 		io.Copy(&buf, r)
 		o := buf.String()
-		log.Trace(o)
+		l.Println("[TRACE] output from OS-specific throttler:")
+		l.Println(o)
 		outC <- o
 	}()
-
-	// log to TRACE
 
 	// back to normal state
 	w.Close()
