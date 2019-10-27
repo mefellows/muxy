@@ -1,0 +1,6 @@
+micro-go
+microgo
+*.bin
+*.bak
+
+sgg/data

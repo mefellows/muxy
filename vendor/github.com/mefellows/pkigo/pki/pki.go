@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"github.com/mefellows/mirror/mirror"
 	"io/ioutil"
 	"log"
 	"os"
@@ -23,16 +22,13 @@ type Pki struct {
 	sync.Mutex
 	ClientTlsConfig *tls.Config
 	ServerTlsConfig *tls.Config
+	BaseDir         string
 }
 
 var PkiConfig Pki
 
-func init() {
-	pki, _ := New()
-	clientConfig, _ := pki.GetClientTLSConfig()
-	serverConfig, _ := pki.GetServerTLSConfig()
-	PkiConfig.ClientTlsConfig = clientConfig
-	PkiConfig.ServerTlsConfig = serverConfig
+func (m *Pki) SetBaseDir(baseDir string) {
+	m.BaseDir = baseDir
 }
 
 func (m *Pki) SetClientTLSConfig(config *tls.Config) {
@@ -50,6 +46,7 @@ type PKI struct {
 }
 
 type Config struct {
+	Application    string
 	ClientKeyPath  string
 	ClientCertPath string
 	ServerKeyPath  string
@@ -76,8 +73,8 @@ func New() (*PKI, error) {
 }
 
 func getDefaultConfig() *Config {
-	caHomeDir := mirror.GetCADir()
-	certDir := mirror.GetCertDir()
+	caHomeDir := GetCADir()
+	certDir := GetCertDir()
 	caCertPath := filepath.Join(caHomeDir, "ca.pem")
 	caKeyPath := filepath.Join(caHomeDir, "key.pem")
 	certPath := filepath.Join(certDir, "cert.pem")
@@ -195,18 +192,18 @@ func (p *PKI) SetupPKI(caHost string) error {
 }
 
 func (p *PKI) OutputClientKey() (string, error) {
-	return mirror.OutputFileContents(p.Config.ClientKeyPath)
+	return OutputFileContents(p.Config.ClientKeyPath)
 }
 
 func (p *PKI) OutputClientCert() (string, error) {
-	return mirror.OutputFileContents(p.Config.ClientCertPath)
+	return OutputFileContents(p.Config.ClientCertPath)
 }
 
 func (p *PKI) OutputCAKey() (string, error) {
-	return mirror.OutputFileContents(p.Config.CaKeyPath)
+	return OutputFileContents(p.Config.CaKeyPath)
 }
 func (p *PKI) OutputCACert() (string, error) {
-	return mirror.OutputFileContents(p.Config.CaCertPath)
+	return OutputFileContents(p.Config.CaCertPath)
 }
 
 func (p *PKI) GetClientTLSConfig() (*tls.Config, error) {
@@ -266,7 +263,7 @@ func (p *PKI) ImportCA(name string, certPath string) error {
 		return errors.New("CA Name must contain only alphanumeric characters")
 	}
 
-	dstCert := filepath.Join(mirror.GetCADir(), fmt.Sprintf("%s-ca.pem", name))
+	dstCert := filepath.Join(GetCADir(), fmt.Sprintf("%s-ca.pem", name))
 	cert, err := ioutil.ReadFile(certPath)
 
 	if err != nil {

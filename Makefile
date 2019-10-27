@@ -12,10 +12,13 @@ package:
 	@TF_DEV=1 sh -c "$(CURDIR)/scripts/package.sh"
 
 test:
-	"$(CURDIR)/scripts/test.sh"
+	@go test ./...
 
 testrace:
 	go test -race $(TEST) $(TESTARGS)
+
+coverage:
+	@$(GOPATH)/bin/goveralls -service=travis-ci
 
 updatedeps:
 	go get -u github.com/mitchellh/gox

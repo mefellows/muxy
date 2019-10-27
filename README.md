@@ -1,4 +1,4 @@
-# <img src="https://cloud.githubusercontent.com/assets/53900/26097013/7c930660-3a66-11e7-9b5c-780b0630d5a4.gif" alt="Muxy Logo" style="height: 80px;" height="80px"/>
+<img src="https://cloud.githubusercontent.com/assets/53900/26097013/7c930660-3a66-11e7-9b5c-780b0630d5a4.gif" alt="Muxy Logo" style="height: 80px;" height="80px"/>
 
 Proxy for simulating real-world distributed system failures to improve resilience in your applications.
 
@@ -19,22 +19,37 @@ If you are building a distributed system, Muxy can help you test your resilience
 
 ### Contents
 
-<!-- TOC depthFrom:2 depthTo:4 withLinks:1 updateOnSave:1 orderedList:0 -->
+<!-- TOC -->
 
-- [Introduction](#introduction) - [Contents](#contents)
-- [Features](#features)
-- [Installation](#installation) - [On Mac OSX using Homebrew](#on-mac-osx-using-homebrew) - [Using Go Get](#using-go-get)
-- [Using Muxy](#using-muxy) - [5-minute example](#5-minute-example) - [Muxy as part of a test suite](#muxy-as-part-of-a-test-suite) - [Notes](#notes)
-- [Proxies and Middlewares](#proxies-and-middlewares) - [Proxies](#proxies) - [HTTP Proxy](#http-proxy) - [TCP Proxy](#tcp-proxy) - [Middleware](#middleware) - [Delay](#delay) - [HTTP Tamperer](#http-tamperer) - [Network Shaper](#network-shaper) - [TCP Tamperer](#tcp-tamperer) - [Logger](#logger)
+- [Introduction](#introduction)
+  - [Contents](#contents)
+- [Installation](#installation)
+  - [On Mac OSX using Homebrew](#on-mac-osx-using-homebrew)
+  - [Using Go Get](#using-go-get)
+- [Using Muxy](#using-muxy)
+  - [5-minute example](#5-minute-example)
+  - [Muxy as part of a test suite](#muxy-as-part-of-a-test-suite)
+  - [Notes](#notes)
+- [Proxies and Middlewares](#proxies-and-middlewares)
+  - [Proxies](#proxies)
+    - [HTTP Proxy](#http-proxy)
+    - [TCP Proxy](#tcp-proxy)
+  - [Middleware](#middleware)
+    - [Delay](#delay)
+    - [HTTP Tamperer](#http-tamperer)
+    - [Network Shaper](#network-shaper)
+    - [TCP Tamperer](#tcp-tamperer)
+    - [Logger](#logger)
 - [Configuration Reference](#configuration-reference)
-- [Examples](#examples) - [Hystrix](#hystrix)
+- [Examples](#examples)
+  - [Hystrix](#hystrix)
 - [Usage with Docker](#usage-with-docker)
-- [Extending Muxy](#extending-muxy) - [Proxies](#proxies) - [Middleware](#middleware)
+- [Extending Muxy](#extending-muxy)
+  - [Proxies](#proxies-1)
+  - [Middleware](#middleware-1)
 - [Contributing](#contributing)
 
 <!-- /TOC -->
-
-## Features
 
 - Ability to tamper with network devices at the transport level (Layer 4)
 - Ability to tamper with the TCP session layer (Layer 5)

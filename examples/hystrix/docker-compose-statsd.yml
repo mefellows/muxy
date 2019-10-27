@@ -1,0 +1,20 @@
+statsd:
+  build: sgg
+  ports:
+    - "8025:80"
+    - "2003:2003/tcp"
+    - "8125:8125/udp"
+    - "8126:8126"
+    - "9200:9200"
+    - "9300:9300"
+    - "8081:81"
+    - "80:80"
+  volumes:
+    - "./sgg/data/whisper:/opt/graphite/storage/whisper"
+    - "./sgg/data/elasticsearch:/var/lib/elasticsearch"
+    - "./sgg/data/sqllite:/opt/grafana/data"
+
+hystrixdashboard:
+  image: kennedyoliveira/hystrix-dashboard
+  ports:
+    - "7979:7979"

@@ -1,0 +1,29 @@
+language: go
+go:
+  - "tip"
+script:
+  - make coverage
+  - make bin
+  - make package
+sudo: false
+go:
+  - tip
+before_install:
+  - go get github.com/mattn/goveralls
+deploy:
+  provider: releases
+  api_key:
+    secure: QlYzkLeuVs7NCpLcqXI0F03cqGJhYl2HND50Gd5U0aOkHvXBgKBccZOJE9NvFsTLSx2i04JusYCqEqBQCbTZK8jLhn3J2eCLpQj4zupQ4I16mINUwZ6IQkR52Jgpa33NPV0DjfyMKbGFcl0Oc8+N+7j6Ij6U2B7hd7Qpvt6KGJHhUoxJj0r/0JKmjRTcE7Bajd7Pq5oy6/rcmHEO6aG/U+mDGc0WueXk+J31YAHIoPgsDCeCmBEsS9QMh9uli/xBQErPoHM0YoB306GCcroFKRfzr0Gs7yMdttnidxUX6zFZAzBhO3y1zLIm/E8fWlXLkcfGofZ8mMhFz74V/fnqRMwjvlvFGBWRykVLXqA/UZbF/nqPtMYBgk/xjjKMxH3xsArMF7GWZfdkaG4rHRCg/Y9IJ6h8HoODQL0Sp1GU7uG/mSrKfTrC9dp3N3ILyUgSBTZCVKx6jHHthZ0x/sxPsjuXHSoPxPOjhWTiV2Gs0TnBPp8f1+D12MKZ2ye6VaBDizM3bOIk2ez7WJyXgd1D+1T31nUuRCCMOBasBe9RxTkxQiKKR+qTE382oOnXzNppB4qCIiTa4029mgJkjZfzdej9UXOMpTNWb81CNqjfm/XWDkc+xL+rT0lz2EXjXdBk9leydC7/IDaIKWAVO787VxD3kXnC4U3/ElyitBHTCsU=
+  file:
+    - dist/SHASUMS
+    - dist/darwin_386.zip
+    - dist/darwin_amd64.zip
+    - dist/freebsd_386.zip
+    - dist/freebsd_amd64.zip
+    - dist/linux_386.zip
+    - dist/linux_amd64.zip
+  on:
+    repo: mefellows/muxy
+env:
+  global:
+    secure: PP8TOum8hMCT0p5SfOeZkpGnp+2I46Is6w3C8M94gxkxcZxs1VZ2/cGR10XcBssk5yY6idRZNkrzDes90HQa6U+jcezT1vXLHTnAgl/sYaj/Qpe6y5F1U3E/jH+9d5Y3QwNLQFNPdVDYNIxp3B+tnzWifiXKY7f9GJmuuzB74zrysd+NYtBQRHfDsezKknCuk3ihaf+GbuhlRNlB5RI7LXmBiVHVcnRCyNEszjPx6phS7yzEc+8fntKLywRDbAAmkML93vYBTH8YYQP8M2qs4pcilrFS4Ye1tBzU3V/+4k0bbhN8C0mfx148t886QTaO3pZpsJ0Eb1xW2FaoNZpH+niamwyJM1Vc3Ypd30FpCQYfSqoCVxc0YsHAJedz0Dev2H9vachJbGmmCTzGP86S2kQ0Dm/CEsOY4/9Qh8SiqDa52jkSSbry32XOjmbfcGj+KrZPUVOW85WdoQs8gQyup8zetrIB3IPuVT8L2IcDKAW04B0Y3yZQwH3u9qERW9RG3+Y8adAa2wZEYkiSBFQzvjJf1yz9J1igBmUyg1h0wkQ/gHErhVJXqwsWsguJLxmh1oJU7zCj1DBde2QRa+/Ea6D2HAMYw9lCTxsxv2xgoMvd1zudRuT+QQMM3wA9xU6AWejjfMlK4KoWqZz1RLYmPaot7ngZIqWZtoLT0ckAy8g=
