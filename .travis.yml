@@ -2,6 +2,7 @@ language: go
 go:
   - "tip"
 script:
+  - make test
   - make coverage
   - make bin
   - make package
