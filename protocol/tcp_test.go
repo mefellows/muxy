@@ -189,7 +189,7 @@ func TestTCPProxy_ProxyFail(t *testing.T) {
 
 	for {
 		select {
-		case <-time.After(1 * time.Second):
+		case <-time.After(5 * time.Second):
 			t.Fatal("Timeout waiting for Proxy to fail")
 		case <-doneChan:
 			return
@@ -198,7 +198,7 @@ func TestTCPProxy_ProxyFail(t *testing.T) {
 }
 
 func waitForPort(port int, t *testing.T) {
-	timeout := time.After(1 * time.Second)
+	timeout := time.After(5 * time.Second)
 	for {
 		select {
 		case <-timeout:
