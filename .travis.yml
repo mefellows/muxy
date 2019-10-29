@@ -15,8 +15,6 @@ script:
   - make bin
   - make package
 sudo: false
-go:
-  - tip
 before_install:
   - go get github.com/mattn/goveralls
 deploy:
