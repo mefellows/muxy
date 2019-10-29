@@ -190,7 +190,7 @@ func (p *HTTPProxy) Proxy() {
 
 func checkHTTPServerError(err error) {
 	if err != nil {
-		log.Error("ListenAndServe error: ", err.Error())
+		log.Error("ListenAndServe error: %s", err.Error())
 	}
 }
 
