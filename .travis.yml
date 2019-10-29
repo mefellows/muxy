@@ -1,5 +1,5 @@
 # use the latest ubuntu environment (18.04) available on travis
-dist: xenial
+# dist: xenial
 
 language: go
 go:
@@ -32,7 +32,7 @@ deploy:
   on:
     repo: mefellows/muxy
 env:
-  jobs:
-    - GO111MODULE=on GOFLAGS='-mod vendor'
+  # jobs:
+  #   - GO111MODULE=on GOFLAGS='-mod vendor'
   global:
     secure: PP8TOum8hMCT0p5SfOeZkpGnp+2I46Is6w3C8M94gxkxcZxs1VZ2/cGR10XcBssk5yY6idRZNkrzDes90HQa6U+jcezT1vXLHTnAgl/sYaj/Qpe6y5F1U3E/jH+9d5Y3QwNLQFNPdVDYNIxp3B+tnzWifiXKY7f9GJmuuzB74zrysd+NYtBQRHfDsezKknCuk3ihaf+GbuhlRNlB5RI7LXmBiVHVcnRCyNEszjPx6phS7yzEc+8fntKLywRDbAAmkML93vYBTH8YYQP8M2qs4pcilrFS4Ye1tBzU3V/+4k0bbhN8C0mfx148t886QTaO3pZpsJ0Eb1xW2FaoNZpH+niamwyJM1Vc3Ypd30FpCQYfSqoCVxc0YsHAJedz0Dev2H9vachJbGmmCTzGP86S2kQ0Dm/CEsOY4/9Qh8SiqDa52jkSSbry32XOjmbfcGj+KrZPUVOW85WdoQs8gQyup8zetrIB3IPuVT8L2IcDKAW04B0Y3yZQwH3u9qERW9RG3+Y8adAa2wZEYkiSBFQzvjJf1yz9J1igBmUyg1h0wkQ/gHErhVJXqwsWsguJLxmh1oJU7zCj1DBde2QRa+/Ea6D2HAMYw9lCTxsxv2xgoMvd1zudRuT+QQMM3wA9xU6AWejjfMlK4KoWqZz1RLYmPaot7ngZIqWZtoLT0ckAy8g=
