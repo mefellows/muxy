@@ -29,9 +29,9 @@ func init() {
 	}, "tcp_proxy")
 }
 
-var check = func(err error) {
+var check = func(protocol string, err error) {
 	if err != nil {
-		log.Fatalf("Error setting up TCP Proxy: %s", err.Error())
+		log.Fatalf("Error setting up %s Proxy: %s", protocol, err.Error())
 	}
 }
 
@@ -48,11 +48,11 @@ func (p *TCPProxy) Teardown() {
 func (p *TCPProxy) Proxy() {
 	log.Trace("Checking connection: %s:%d", p.Host, p.Port)
 	laddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", p.Host, p.Port))
-	check(err)
+	check("tcp", err)
 	raddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", p.ProxyHost, p.ProxyPort))
-	check(err)
+	check("tcp", err)
 	listener, err := net.ListenTCP("tcp", laddr)
-	check(err)
+	check("tcp", err)
 
 	for {
 		log.Info("TCP Proxy proxy listening on %s", log.Colorize(log.BLUE, fmt.Sprintf("tcp://%s:%d", p.Host, p.Port)))

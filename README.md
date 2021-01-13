@@ -288,7 +288,7 @@ middleware:
 
 The network shaper plugin is a Layer 4 tamperer, and requires _root access_ to work, as it needs to configure the local firewall and network devices.
 Using the excellent [Comcast](https://github.com/tylertreat/comcast) library, it can shape and interfere with network traffic,
-including bandwidth, latency, packet loss and jitter on specified ports, IPs and protocols.
+including bandwidth, latency, packet loss and jitter on specified ports, IPs over multiple protocols.
 
 NOTE: This component only works on MacOSX, FreeBSD, Linux and common \*nix flavours.
 

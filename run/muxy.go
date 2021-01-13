@@ -69,6 +69,10 @@ func (m *Muxy) Run() {
 	for _, m := range m.middlewares {
 		m.Teardown()
 	}
+
+	for _, p := range m.proxies {
+		p.Teardown()
+	}
 }
 
 // LoadPlugins loads all plugins dynamically and configures them
